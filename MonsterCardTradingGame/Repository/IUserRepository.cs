@@ -8,7 +8,7 @@ namespace MonsterCardTradingGame.DB.Repository
 {
     public interface IUserRepository
     {
-        bool Create(Model.User user); //void
+        void Create(Model.User user); //void
         IEnumerable<Model.User> GetAllUser();
         Model.User GetByName(string username);
         Model.User GetById(int id); //DB ID

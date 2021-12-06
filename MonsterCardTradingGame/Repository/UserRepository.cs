@@ -16,7 +16,7 @@ namespace MonsterCardTradingGame.DB.Respository
         //NpgsqlConnection _connection = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432");
 
         /* Create */
-        public bool Create(User user)
+        public void Create(User user)
         {
             using (NpgsqlConnection _connection  = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432"))
             {
@@ -24,7 +24,7 @@ namespace MonsterCardTradingGame.DB.Respository
 
                 using (var command = _connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO player2 (username, password) VALUES (@username,@password);";
+                    command.CommandText = "INSERT INTO player (username, password) VALUES (@username,@password);";
                     command.Parameters.AddWithValue("@username", user.Username);
                     command.Parameters.AddWithValue("@password", user.Password);
                     
@@ -34,10 +34,9 @@ namespace MonsterCardTradingGame.DB.Respository
 
                     }catch(Exception e)
                     {
-                        Console.WriteLine(e);
+                        throw;
                     }
                     _connection.Close();
-                    return true;
                 }
             }
         }

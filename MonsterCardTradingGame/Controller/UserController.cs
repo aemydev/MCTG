@@ -15,13 +15,13 @@ namespace MonsterCardTradingGame.Controller
         /*
          *  Register a new User
          */
-        public static bool Register(Model.Credentials cred)
+        public static bool Register(Json.Credentials cred)
         {
             try
             {
                 userrepos.Create(new Model.User(cred.Username, cred.Password));
                 return true;
-            }catch(Exception e)
+            }catch
             {
                 return false;
             }    

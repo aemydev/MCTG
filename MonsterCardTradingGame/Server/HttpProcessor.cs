@@ -11,27 +11,17 @@ using System.Threading.Tasks;
 namespace MonsterCardTradingGame.Server
 {
     /*
-     * Properly parse the HTTP header 
+     * Properly parse the HTTP header & content
      */
     class HttpProcessor
     {
         private TcpClient socket;
         private HttpServer httpServer;
 
-        public string Method { get; private set; } // GET, POST 
-        public string Path { get; private set; } // bzw. our CMD
-        public string Version { get; private set; }
-        public string Content { get; private set; }
-
-        public Dictionary<string, string> Headers { get; } // Header e.g. Content-Type
-
         public HttpProcessor(TcpClient sock, HttpServer httpServer)
         {
             this.socket = sock;
             this.httpServer = httpServer;
-
-            Method = null;
-            Headers = new();
         }
 
         /*
@@ -41,122 +31,107 @@ namespace MonsterCardTradingGame.Server
         {
             StreamWriter writer = new StreamWriter(socket.GetStream()) { AutoFlush = true };
             NetworkStream reader = socket.GetStream();
-            //var reader = new StreamReader(socket.GetStream());
 
             /*
-             *  Parse the Header
+             *  Parse the Request
              */
+            HttpRequest httpRequest = ParseHeader(reader);
+
+            // For POST only: Parse Content
+            if(httpRequest.Method.Equals("POST"))
+            {
+                if (httpRequest.Headers.ContainsKey("Content-Length"))
+                {
+                    httpRequest.Content = ParseContent(reader, httpRequest.Headers["Content-Length"]);
+                }
+                else
+                {
+                    // Error Handling
+                    // POST must contain content
+                }
+            }
+
+            /*
+             *  Endpoints -> bessere Lösung finden
+             */
+            if (httpRequest.Method == "POST" && httpRequest.Path == "/users")
+            {
+                Json.Credentials credentials = JsonConvert.DeserializeObject<Json.Credentials>(httpRequest.Content);
+
+                // Generate User & Save to DB
+                if (Controller.UserController.Register(credentials))
+                {
+                    HttpResponse httpResponse = new HttpResponse(HttpStatusCode.OK);
+                    httpResponse.AddContent("<html><body><h1>User successfully registered</h1></body></html>");
+                    httpResponse.Send(writer, httpServer.serverName);
+                }
+                else
+                {
+                    HttpResponse httpResponse = new HttpResponse(HttpStatusCode.Conflict);
+                    httpResponse.AddContent("<html><body><h1>User registration failed.</h1></body></html>");
+                    httpResponse.Send(writer, httpServer.serverName);
+                }
+            }
+            else
+            {
+                HttpResponse httpResponse = new HttpResponse(HttpStatusCode.NotFound);
+                httpResponse.AddContent("<html><body><h1>Error 404 - Not implemented</h1></body></html>");
+                httpResponse.Send(writer, httpServer.serverName);
+            }
+        }
+
+        /*
+         *  Parse the Header
+         */
+        private HttpRequest ParseHeader(NetworkStream reader)
+        {
+            string method = null, path = null, version = null;
+            Dictionary<string, string> headers = new();
+
             string line = null;
+
             while ((line = ReadLine(reader)) != null)
             {
-                Console.WriteLine(line); // Debug
 
                 if (line.Length == 0)
                 {
                     break; // End of header reached
                 }
 
-                if (Method == null) // handle first line of HTTP
+                if (method == null) // handle first line of HTTP
                 {
                     var parts = line.Split(' ');
-                    Method = parts[0];
-                    Path = parts[1];
-                    Version = parts[2];
+                    method = parts[0];
+                    path = parts[1];
+                    version = parts[2];
                 }
                 else // handle HTTP headers
                 {
                     var parts = line.Split(": ");
-                    Headers.Add(parts[0], parts[1]);
+                    headers.Add(parts[0], parts[1]);
                 }
             }
 
-
-            /*
-             *  Parse the Content (only POST)
-             */
-            if (Headers.ContainsKey("Content-Length"))
-            {
-                int totalBytes = Convert.ToInt32(Headers["Content-Length"]);
-
-                byte[] data = new BinaryReader(reader).ReadBytes(totalBytes);
-
-                Content = Encoding.UTF8.GetString(data);
-                Console.WriteLine(Content);
-            }
-
-
-            /*
-             *   Respond according to the Path & Method -> eigene Klasse, Funktion ??
-             */
-            if (Method == "POST" && Path == "/users")
-            {
-                // Task ?
-                var user = JsonConvert.DeserializeObject<Model.Credentials>(Content);
-
-                // Generate User & Save to DB
-                if (Controller.UserController.Register(user))
-                {
-                    // If successfull, send Response with 201
-
-                    // Generate HttpResponse
-                    string responseContent = "<html><body><h1>User successfully registered</h1></body></html>";
-                    Console.WriteLine();
-                    WriteLine(writer, "HTTP/1.1 200 OK"); //
-                    WriteLine(writer, $"Server: {httpServer.serverName}");
-                    WriteLine(writer, $"Current Time: {DateTime.Now}");
-                    WriteLine(writer, $"Content-Length: {responseContent.Length}");
-                    WriteLine(writer, "Content-Type: text/html; charset=utf-8");
-                    WriteLine(writer, "");
-                    WriteLine(writer, responseContent);
-                    writer.WriteLine();
-                    writer.Flush();
-                    writer.Close();
-                }
-                else
-                {
-                    // send correct error eode Response
-                    // Generate HttpResponse
-                    string responseContent = "<html><body><h1>User registration failed.</h1></body></html>";
-                    Console.WriteLine();
-                    WriteLine(writer, "HTTP/1.1 409 CONFLICT");
-                    WriteLine(writer, $"Server: {httpServer.serverName}");
-                    WriteLine(writer, $"Current Time: {DateTime.Now}");
-                    WriteLine(writer, $"Content-Length: {responseContent.Length}");
-                    WriteLine(writer, "Content-Type: text/html; charset=utf-8");
-                    WriteLine(writer, "");
-                    WriteLine(writer, responseContent);
-                    writer.WriteLine();
-                    writer.Flush();
-                    writer.Close();
-                }
-            }
-            else
-            {
-                string responseContent = "<html><body><h1>Error 404 - Not implemented</h1></body></html>";
-                Console.WriteLine();
-                WriteLine(writer, "HTTP/1.1 404 Not found");
-                WriteLine(writer, $"Server: {httpServer.serverName}");
-                WriteLine(writer, $"Current Time: {DateTime.Now}");
-                WriteLine(writer, $"Content-Length: {responseContent.Length}");
-                WriteLine(writer, "Content-Type: text/html; charset=utf-8");
-                WriteLine(writer, "");
-                WriteLine(writer, responseContent);
-                writer.WriteLine();
-                writer.Flush();
-                writer.Close();
-            }
+            return new HttpRequest(method, path, version, headers);
         }
 
         /*
-         *  Write to Stream & Console
+         *  Parse the Content, only POST
          */
-        private void WriteLine(StreamWriter writer, string s)
+        private string ParseContent(NetworkStream reader, string contentLength)
         {
-            Console.WriteLine(s);
-            writer.WriteLine(s);
+           int totalBytes = Convert.ToInt32(contentLength);
+
+           byte[] data = new BinaryReader(reader).ReadBytes(totalBytes);
+
+           string Content = Encoding.UTF8.GetString(data);
+
+           return Content; 
         }
 
-        // Change? Are there other options?
+        /*
+         *  Own Readline 
+         */
         private string ReadLine(Stream stream)
         {
             int nextChar;

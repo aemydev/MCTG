@@ -13,11 +13,10 @@ namespace MonsterCardTradingGame.DB.Respository
 {
     class UserRepository : IUserRepository
     {
-        //NpgsqlConnection _connection = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432");
-
         /* Create */
         public void Create(User user)
         {
+            // Connection String Env-Varibale or config file
             using (NpgsqlConnection _connection  = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432"))
             {
                 _connection.Open();
@@ -28,15 +27,19 @@ namespace MonsterCardTradingGame.DB.Respository
                     command.Parameters.AddWithValue("@username", user.Username);
                     command.Parameters.AddWithValue("@password", user.Password);
                     
+                    // Try Catch Needed?
                     try
                     {
                         command.ExecuteScalar();
 
-                    }catch(Exception e)
+                    }catch
                     {
                         throw;
                     }
-                    _connection.Close();
+                    finally
+                    {
+                        _connection.Close(); // needed?
+                    }
                 }
             }
         }

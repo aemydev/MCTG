@@ -11,18 +11,18 @@ namespace MonsterCardTradingGame.Server
     class HttpResponse
     {
         public string StatusCode { get; set; }
-        public string Method { get; private set; } // GET, POST 
         public string Version { get; private set; }
+        public string ContentType { get; set; }
         public string Content { get; set; } // only post
-        public Dictionary<string, string> Headers { get; set; }
+        // public Dictionary<string, string> Headers { get; set; }
         private Dictionary<HttpStatusCode, string> StatusCodeString;
 
-        public HttpResponse(HttpStatusCode statusCode, string content = null)
+        public HttpResponse(HttpStatusCode statusCode)
         {
-            initStatusCodes();
+            initStatusCodes(); // bessere Lösung
             this.StatusCode = StatusCodeString[statusCode];
-            this.Version = "1.1";
-            this.Content = content;
+            this.Version = "1.1"; // -> we only use Http Version 1.1
+            this.Content = null;
         }  
 
         // bessere Lösung?
@@ -36,28 +36,56 @@ namespace MonsterCardTradingGame.Server
         }
 
         /*
-        void addHeader(string key, string value)
+        public void addHeader(string key, string value)
         {
             Headers.Add(key, value);
         }
         */
-
-        public void AddContent(string content)
+ 
+        // Set Content-Type and Content of Response:
+        public void AddContent(string contentType, string content)
         {
+            ContentType = contentType;
             Content = content;
         }
 
         public void Send(StreamWriter writer, string serverName)
         {
+            /* 
+            HTTP/Version Response-Code (Status)
+            Klartext-Meldung (Reason)
+            General Header
+            Response Header
+            Entity Header (optional)
+            Leerzeile (!)
+            Resource Entity (falls vorhanden)
+            */
+
+            // If there is no content -> Content-Length = 0
             string responseContent = Content == null ? "0" : Content;
 
-            WriteLine(writer, $"HTTP/{Version} {StatusCode}"); 
-            WriteLine(writer, $"Server: {serverName}");
+            // HTTP/Version Response-Code (Status)
+            WriteLine(writer, $"HTTP/{Version} {StatusCode}"); // !!
+
+            // Klartext - Meldung(Reason)
             WriteLine(writer, $"Current Time: {DateTime.Now}");
+
+            // General Header
+            // token?
+
+            // Response Header -> Header mit weiteren Informationen zur
+            // Antwort, wie etwa ihres Orts oder den Server selbst (Name und Version etc.)
+            WriteLine(writer, $"Server: {serverName}"); // !!
+
+            // Entity Header(optional) -> Infos about Body, if it exists
             WriteLine(writer, $"Content-Length: {responseContent.Length}");
-            WriteLine(writer, "Content-Type: text/html; charset=utf-8");
-            WriteLine(writer, ""); // Leerzeile, dann Content
-            WriteLine(writer, responseContent);
+            WriteLine(writer, $"Content-Type: {ContentType}");
+
+            // Leerzeile(!)
+            WriteLine(writer, ""); 
+
+            WriteLine(writer, responseContent); // only if set
+
             writer.WriteLine();
             writer.Flush();
             writer.Close();

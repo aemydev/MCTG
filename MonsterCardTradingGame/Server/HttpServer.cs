@@ -14,6 +14,7 @@ namespace MonsterCardTradingGame.Server
         protected int port; // Default: 8080
         private IPAddress ip; // Default: IPAddress.Loopback
         public string serverName = "MonsterCardTradingGameServer";
+        public Router.Router router = new Router.Router(); 
 
         private TcpListener listener;
 
@@ -36,7 +37,7 @@ namespace MonsterCardTradingGame.Server
 
                 HttpProcessor processor = new HttpProcessor(sock, this);
 
-                new Thread(processor.Process).Start(); //Tasks?
+                new Thread(processor.Process).Start(); // Tasks?
 
                 Thread.Sleep(1);
             }

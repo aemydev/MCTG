@@ -38,7 +38,7 @@ namespace MonsterCardTradingGame.Server
             HttpRequest httpRequest = ParseHeader(reader);
 
             // For POST only: Parse Content
-            if(httpRequest.Method.Equals("POST"))
+            if (httpRequest.Method.Equals("POST"))
             {
                 if (httpRequest.Headers.ContainsKey("Content-Length"))
                 {
@@ -48,37 +48,39 @@ namespace MonsterCardTradingGame.Server
                 {
                     // Error Handling
                     // POST must contain content
+                    HttpResponse httpResponse = new HttpResponse(HttpStatusCode.BadRequest);
+                    httpResponse.AddContent("application/json", "{\"response\":\"Internal Server Error\"}");
+                    httpResponse.Send(writer, httpServer.serverName);
                 }
             }
 
             /*
-             *  Endpoints -> bessere Lösung finden
+             *  Endpoints
              */
-            if (httpRequest.Method == "POST" && httpRequest.Path == "/users")
+            if (httpServer.router.GetRoutes.ContainsKey(httpRequest.Path) || httpServer.router.PostRoutes.ContainsKey(httpRequest.Path))
             {
-                Json.Credentials credentials = JsonConvert.DeserializeObject<Json.Credentials>(httpRequest.Content);
+                HttpResponse res;
 
-                // Generate User & Save to DB
-                if (Controller.UserController.Register(credentials))
+                if (httpRequest.Method == "POST")
                 {
-                    HttpResponse httpResponse = new HttpResponse(HttpStatusCode.OK);
-                    httpResponse.AddContent("<html><body><h1>User successfully registered</h1></body></html>");
-                    httpResponse.Send(writer, httpServer.serverName);
+                    res = httpServer.router.invoke(httpRequest.Method, httpRequest.Path, httpRequest.Content);
                 }
                 else
                 {
-                    HttpResponse httpResponse = new HttpResponse(HttpStatusCode.Conflict);
-                    httpResponse.AddContent("<html><body><h1>User registration failed.</h1></body></html>");
-                    httpResponse.Send(writer, httpServer.serverName);
+                    res = httpServer.router.invoke(httpRequest.Method, httpRequest.Path);
                 }
+
+                res.Send(writer, httpServer.serverName);
             }
             else
             {
+                // Error 404 - Not found
                 HttpResponse httpResponse = new HttpResponse(HttpStatusCode.NotFound);
-                httpResponse.AddContent("<html><body><h1>Error 404 - Not implemented</h1></body></html>");
+                httpResponse.AddContent("application/json", "{\"response\":\"Error 404 - not found\"}");
                 httpResponse.Send(writer, httpServer.serverName);
             }
         }
+
 
         /*
          *  Parse the Header

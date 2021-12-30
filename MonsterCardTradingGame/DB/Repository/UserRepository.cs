@@ -16,32 +16,16 @@ namespace MonsterCardTradingGame.DB.Respository
         /* Create */
         public void Create(User user)
         {
-            // Connection String Env-Varibale or config file
-            using (NpgsqlConnection _connection  = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432"))
+            try
             {
-                _connection.Open();
-
-                using (var command = _connection.CreateCommand())
-                {
-                    command.CommandText = "INSERT INTO player (username, password) VALUES (@username,@password);";
-                    command.Parameters.AddWithValue("@username", user.Username);
-                    command.Parameters.AddWithValue("@password", user.Password);
-                    
-                    // Try Catch Needed?
-                    try
-                    {
-                        command.ExecuteScalar();
-
-                    }catch
-                    {
-                        throw;
-                    }
-                    finally
-                    {
-                        _connection.Close(); // needed?
-                    }
-                }
+                DAL.PostgresDBAccess db = DAL.PostgresDBAccess.Instance;
+                db.Insert(user);
             }
+            catch
+            {
+                throw;
+            }
+       
         }
 
         /* Read */

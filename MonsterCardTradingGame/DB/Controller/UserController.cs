@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MonsterCardTradingGame.Controller
 {
@@ -15,7 +16,7 @@ namespace MonsterCardTradingGame.Controller
         /*
          *  Register a new User
          */
-        public static bool Register(Json.Credentials cred)
+        public static bool Register(Utility.Json.CredentialsJson cred)
         {
             try
             {
@@ -25,6 +26,16 @@ namespace MonsterCardTradingGame.Controller
             {
                 return false;
             }    
+        }
+
+        /*
+         *  Login User
+         */
+        public static bool Login(Utility.Json.CredentialsJson cred)
+        {
+            //
+            // Login User
+            return true;
         }
     }
 }

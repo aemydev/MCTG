@@ -14,5 +14,7 @@ namespace MonsterCardTradingGame.DB.Repository
         Model.User GetById(int id); //DB ID
         void UpdateUser(Model.User user);
         void DeleteUser(Model.User user);
+
+        public string GetPwByUsername(string username);
     }
 }

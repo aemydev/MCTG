@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using MonsterCardTradingGame.Server;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,18 +12,38 @@ namespace MonsterCardTradingGame.Router.Endpoints
 {
     class Login : IEndpoint
     {
-        public bool call(string content = null)
+        public HttpResponse call(string content = null)
         {
             // String -> Json (Credentials)
             var cred = JsonConvert.DeserializeObject<Utility.Json.CredentialsJson>(content);
-
-            if (Controller.UserController.Login(cred))
+            
+            try
             {
-                return true; // Res direkt senden?
+                if (Controller.UserController.Login(cred))
+                {
+                    // return response with Token set
+                    HttpResponse res;
+                    res = new HttpResponse(HttpStatusCode.OK);
+                    res.addHeader("Authorization", "valid");
+                    res.AddContent("application/json", "{\"response\":\"Login successful.\"}");
+                    return res;
+                }
+                else
+                {
+                    // Response ohne Token -> Error
+                    HttpResponse res;
+                    res = new HttpResponse(HttpStatusCode.Forbidden);
+                    res.AddContent("application/json", "{\"response\":\"Login failed. Please try again.\"}");
+                    return res;
+                }
             }
-            else
+            catch (System.Exception e)
             {
-                return false;
+                HttpResponse res;
+                res = new HttpResponse(HttpStatusCode.Forbidden);
+                string errorMsg = "{\"response\":\"" + $"{ e.Message}" + "\"}";
+                res.AddContent("application/json", errorMsg);
+                return res;
             }
         }
     }

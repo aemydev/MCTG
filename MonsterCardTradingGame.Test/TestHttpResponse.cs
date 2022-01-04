@@ -9,6 +9,10 @@ namespace MonsterCardTradingGame.Test
         {
         }
 
-       
+        [Test]
+        public void Test2()
+        {
+            Assert.Pass();
+        }
     }
 }

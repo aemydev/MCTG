@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using MonsterCardTradingGame.Server;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace MonsterCardTradingGame.Router.Endpoints
 {
     interface IEndpoint
     {
-        public bool call(string content = null);
+        public HttpResponse call(string content = null);
     }
 }

@@ -29,6 +29,11 @@ namespace MonsterCardTradingGame.DB.Respository
         }
 
         /* Read */
+        public bool UserExistsByUsername(string username)
+        {
+            throw new NotImplementedException();
+        }
+
         public User GetById(int id)
         {
             throw new NotImplementedException();
@@ -50,6 +55,19 @@ namespace MonsterCardTradingGame.DB.Respository
             throw new NotImplementedException();
         }
 
+        public string GetPwByUsername(string username)
+        {
+            try
+            {
+                DAL.PostgresDBAccess db = DAL.PostgresDBAccess.Instance;
+                return db.SelectPwByUsername(username);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         /* Update */
         public void UpdateUser(User user)
         {
@@ -61,6 +79,5 @@ namespace MonsterCardTradingGame.DB.Respository
         {
             throw new NotImplementedException();
         }
-
     }
 }

@@ -44,12 +44,41 @@ namespace MonsterCardTradingGame.DAL
                 command.Parameters.AddWithValue("@username", user.Username);
                 command.Parameters.AddWithValue("@password", user.Password);
                 command.ExecuteScalar();
+                command.Dispose(); //??
             }
             catch (System.Exception e)
             {
                 Console.WriteLine(e.Message);
                 throw; // Better Error Handeling
             }
+        }
+    
+
+        public string SelectPwByUsername(string username)
+        {
+            object pw;
+            try
+            {
+                var sql = $"SELECT password FROM player WHERE username='{username}';";
+              
+                    var cmd = new NpgsqlCommand(sql, _connection);
+                    pw = cmd.ExecuteScalar();
+                
+                
+             
+                // handle if user exists
+            }
+            catch (System.Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw; // Better Error Handeling
+            }
+
+            if(pw is not null)
+            {
+                return pw.ToString();
+            }
+            return ""; // ADASFASFD
         }
     }
 }

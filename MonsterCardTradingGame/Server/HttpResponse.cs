@@ -14,7 +14,7 @@ namespace MonsterCardTradingGame.Server
         public string Version { get; private set; }
         public string ContentType { get; set; }
         public string Content { get; set; } // only post
-        // public Dictionary<string, string> Headers { get; set; }
+        public Dictionary<string, string> Headers { get; set; }
         private Dictionary<HttpStatusCode, string> StatusCodeString;
 
         public HttpResponse(HttpStatusCode statusCode)
@@ -23,25 +23,24 @@ namespace MonsterCardTradingGame.Server
             this.StatusCode = StatusCodeString[statusCode];
             this.Version = "1.1"; // -> we only use Http Version 1.1
             this.Content = null;
+            Headers = new();
         }  
 
-        // bessere Lösung?
         void initStatusCodes()
         {
             StatusCodeString = new();
-            StatusCodeString.Add(HttpStatusCode.OK, "200 OK");
-            StatusCodeString.Add(HttpStatusCode.Created, "201 CREATED");
-            StatusCodeString.Add(HttpStatusCode.Conflict, "409 CONFLICT");
-            StatusCodeString.Add(HttpStatusCode.NotFound, "404 NOT FOUND");
+            StatusCodeString.Add(HttpStatusCode.OK, "200");
+            StatusCodeString.Add(HttpStatusCode.Created, "201");
+            StatusCodeString.Add(HttpStatusCode.Conflict, "409");
+            StatusCodeString.Add(HttpStatusCode.NotFound, "404");
+            StatusCodeString.Add(HttpStatusCode.Forbidden, "403");
         }
 
-        /*
         public void addHeader(string key, string value)
         {
             Headers.Add(key, value);
         }
-        */
- 
+       
         // Set Content-Type and Content of Response:
         public void AddContent(string contentType, string content)
         {
@@ -72,6 +71,13 @@ namespace MonsterCardTradingGame.Server
 
             // General Header
             // token?
+            if (Headers.Count() > 0)
+            {
+                foreach (KeyValuePair<string, string> header_ in Headers)
+                {
+                    WriteLine(writer, $"{header_.Key}: {header_.Value}");
+                }
+            }
 
             // Response Header -> Header mit weiteren Informationen zur
             // Antwort, wie etwa ihres Orts oder den Server selbst (Name und Version etc.)

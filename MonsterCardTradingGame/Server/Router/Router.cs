@@ -40,16 +40,7 @@ namespace MonsterCardTradingGame.Router
 
             if (method == "POST")
             {
-                if (PostRoutes[path].call(reqContent))
-                {
-                    res = new HttpResponse(HttpStatusCode.OK);
-                    res.AddContent("application/json", "{\"response\":\"Success\"}");
-                }
-                else
-                {
-                    res = new HttpResponse(HttpStatusCode.Conflict);
-                    res.AddContent("application/json", "{\"response\":\"Error asdfasdf - not found\"}");
-                }
+                res = PostRoutes[path].call(reqContent);
             }
             else
             {

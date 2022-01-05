@@ -13,6 +13,7 @@ namespace MonsterCardTradingGame.Model
         public string Password { get; private set; }
         public int Coins { get; set; }
         public string Token { get; private set; }
+        public Model.Card[] Deck { get; set; }
 
         public User(string name, string password, string token = "", int userid = 0, int coins = 20)
         {

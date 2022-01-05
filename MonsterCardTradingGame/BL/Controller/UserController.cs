@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MonsterCardTradingGame.Controller
+namespace MonsterCardTradingGame.BL.Controller
 {
     class UserController
     {
-        static DB.Repository.IUserRepository userrepos = new DB.Respository.UserRepository();
+        static DAL.Repository.IUserRepository userrepos = new DAL.Respository.UserRepository();
 
         /*
          *  Register a new User
@@ -21,44 +21,47 @@ namespace MonsterCardTradingGame.Controller
         {
             // Hash the password
             cred.Password = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                cred.Password, 
-                Encoding.UTF8.GetBytes("js83$0jolsod/"), 
-                KeyDerivationPrf.HMACSHA512, 
-                10, 
+                cred.Password,
+                Encoding.UTF8.GetBytes("js83$0jolsod/"),
+                KeyDerivationPrf.HMACSHA512,
+                10,
                 64)
             );
 
+            // Add to User Table
             try
             {
                 userrepos.Create(new Model.User(cred.Username, cred.Password));
                 return true;
-            }catch(System.Exception e)
+            } catch (System.Exception e)
             {
                 Console.WriteLine($"[{ DateTime.UtcNow}] - {e.Message}");
                 return false; // Registration failed
-            }    
+            }
+            
+            // Add Deck?
+
         }
 
         /*
-         *  Login User
+         *  Login User, returns Token if login successful, if not returns empty string
          */
-        public static bool Login(Utility.Json.CredentialsJson cred)
+        public static string Login(Utility.Json.CredentialsJson cred)
         {
             string passwordFromDB;
             try
             {
                 passwordFromDB = userrepos.GetPwByUsername(cred.Username);
             }
-            catch (System.Exception e)
+            catch
             {
-                Console.WriteLine($"[{ DateTime.UtcNow}] - {e.Message}");
-                throw; // sth went wrong with the DB, user might not exist
+                return ""; // sth went wrong with the DB, user might not exist
             }
 
             // Hash the pw the user entered:
             cred.Password = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 cred.Password,
-                Encoding.UTF8.GetBytes("js83$0jolsod/"),
+                Encoding.UTF8.GetBytes("js83$0jolsod/"), // Salt Value
                 KeyDerivationPrf.HMACSHA512,
                 10,
                 64));
@@ -66,17 +69,23 @@ namespace MonsterCardTradingGame.Controller
             // Check if pw match up:
             if (passwordFromDB == cred.Password)
             {
-                // yes -> return true
-                return true;
+                return generateToken(cred.Username);
             }
             else
             {
-                // no -> return false, incorrect pw
-                return false;
+                return ""; // Incorrect Password -> no token returned
             }
         }
 
 
 
+
+
+
+        private static string generateToken(string username)
+        {
+            string token = $"Basic {username}-mctgToken";
+            return token;
+        }
     }
 }

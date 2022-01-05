@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Server
 {
-    class HttpResponse
+    public class HttpResponse
     {
         public string StatusCode { get; set; }
         public string Version { get; private set; }
@@ -19,7 +19,7 @@ namespace MonsterCardTradingGame.Server
 
         public HttpResponse(HttpStatusCode statusCode)
         {
-            initStatusCodes(); // bessere Lösung
+            initStatusCodes(); 
             this.StatusCode = StatusCodeString[statusCode];
             this.Version = "1.1"; // -> we only use Http Version 1.1
             this.Content = null;
@@ -70,7 +70,6 @@ namespace MonsterCardTradingGame.Server
             WriteLine(writer, $"Current Time: {DateTime.Now}");
 
             // General Header
-            // token?
             if (Headers.Count() > 0)
             {
                 foreach (KeyValuePair<string, string> header_ in Headers)

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Server
 {
-    class HttpRequest
+    public class HttpRequest
     {
         public string Method { get; private set; } // GET, POST 
         public string Path { get; private set; } // api/controller

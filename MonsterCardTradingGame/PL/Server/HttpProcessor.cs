@@ -57,28 +57,22 @@ namespace MonsterCardTradingGame.Server
             /*
              *  Endpoints
              */
-            if (httpServer.router.GetRoutes.ContainsKey(httpRequest.Path) || httpServer.router.PostRoutes.ContainsKey(httpRequest.Path))
-            {
-                HttpResponse res;
+            Console.WriteLine("Processing Msg...");
+            HttpResponse res;
 
-                if (httpRequest.Method == "POST")
-                {
-                    res = httpServer.router.invoke(httpRequest.Method, httpRequest.Path, httpRequest.Content);
-                }
-                else
-                {
-                    res = httpServer.router.invoke(httpRequest.Method, httpRequest.Path);
-                }
-
-                res.Send(writer, httpServer.serverName);
+            if (httpServer.router.PostRoutes.ContainsKey(httpRequest.Path)) {
+                Console.WriteLine("Invoke the Delegate");
+                res = httpServer.router.PostRoutes[httpRequest.Path](httpRequest);
+                Console.WriteLine("done");
             }
             else
             {
                 // Error 404 - Not found
-                HttpResponse httpResponse = new HttpResponse(HttpStatusCode.NotFound);
-                httpResponse.AddContent("application/json", "{\"response\":\"Error 404 - not found\"}");
-                httpResponse.Send(writer, httpServer.serverName);
+                res = new HttpResponse(HttpStatusCode.NotFound);
+                res.AddContent("application/json", "{\"response\":\"Error 404 - not found\"}");
             }
+
+            res.Send(writer, httpServer.serverName);
         }
 
 

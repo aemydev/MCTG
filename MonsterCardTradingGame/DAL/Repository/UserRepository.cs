@@ -1,5 +1,4 @@
-﻿using MonsterCardTradingGame.DB.Repository;
-using MonsterCardTradingGame.Model;
+﻿using MonsterCardTradingGame.DAL.Repository;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,20 +8,22 @@ using System.Threading.Tasks;
 using Npgsql;
 using System.Data;
 
-namespace MonsterCardTradingGame.DB.Respository
+namespace MonsterCardTradingGame.DAL.Respository
 {
     class UserRepository : IUserRepository
     {
         /* Create */
-        public void Create(User user)
+        public void Create(Model.User user)
         {
             try
             {
-                DAL.PostgresDBAccess db = DAL.PostgresDBAccess.Instance;
+                DAL.Postgres.DBAccess db = DAL.Postgres.DBAccess.Instance;
                 db.Insert(user);
             }
-            catch
+            catch(System.Exception e)
             {
+                // Sth went wrong with Creating the User(bzw. Player)
+                Console.WriteLine($"[{DateTime.UtcNow}] {e.Message} {e.GetType()}");
                 throw;
             }
        
@@ -34,12 +35,12 @@ namespace MonsterCardTradingGame.DB.Respository
             throw new NotImplementedException();
         }
 
-        public User GetById(int id)
+        public Model.User GetById(int id)
         {
             throw new NotImplementedException();
         }
 
-        public User GetByName(string username)
+        public Model.User GetByName(string username)
         {
             using (NpgsqlConnection _connection = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432"))
             {
@@ -47,10 +48,10 @@ namespace MonsterCardTradingGame.DB.Respository
                 //Use Connection here 
             }
 
-            return new User("ines", "token");
+            return new Model.User("ines", "token");
         }
 
-        public IEnumerable<User> GetAllUser()
+        public IEnumerable<Model.User> GetAllUser()
         {
             throw new NotImplementedException();
         }
@@ -59,23 +60,24 @@ namespace MonsterCardTradingGame.DB.Respository
         {
             try
             {
-                DAL.PostgresDBAccess db = DAL.PostgresDBAccess.Instance;
+                DAL.Postgres.DBAccess db = DAL.Postgres.DBAccess.Instance;
                 return db.SelectPwByUsername(username);
             }
-            catch
+            catch(Npgsql.NpgsqlException e)
             {
+                Console.WriteLine($"{DateTime.UtcNow}] {e.Message}");
                 throw;
             }
         }
 
         /* Update */
-        public void UpdateUser(User user)
+        public void UpdateUser(Model.User user)
         {
             throw new NotImplementedException();
         }
 
         /* Delete */
-        public void DeleteUser(User user)
+        public void DeleteUser(Model.User user)
         {
             throw new NotImplementedException();
         }

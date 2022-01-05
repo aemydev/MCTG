@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MonsterCardTradingGame.Model
+namespace MonsterCardTradingGame.Utility.Json
 {
-    class Card
+    class CardList
     {
+        public CardJson record;
     }
 }

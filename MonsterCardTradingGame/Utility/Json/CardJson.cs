@@ -11,5 +11,6 @@ namespace MonsterCardTradingGame.Utility.Json
         public string Id { get; set; }
         public string Name { get; set; }
         public float Damage { get; set; }
+        public string Type { get; set; }
     }
 }

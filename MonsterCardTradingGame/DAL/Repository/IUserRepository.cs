@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MonsterCardTradingGame.DB.Repository
+namespace MonsterCardTradingGame.DAL.Repository
 {
     public interface IUserRepository
     {

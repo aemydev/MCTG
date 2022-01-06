@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MonsterCardTradingGame.BL.Controller
+namespace MonsterCardTradingGame.BL.Services
 {
-    class UserController
+    class UserService
     {
         static DAL.Repository.IUserRepository userrepos = new DAL.Respository.UserRepository();
 
@@ -19,7 +19,7 @@ namespace MonsterCardTradingGame.BL.Controller
          */
         public static bool Register(Utility.Json.CredentialsJson cred)
         {
-            // Hash the password
+            // Hash the Password
             cred.Password = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 cred.Password,
                 Encoding.UTF8.GetBytes("js83$0jolsod/"),
@@ -28,19 +28,17 @@ namespace MonsterCardTradingGame.BL.Controller
                 64)
             );
 
-            // Add to User Table
+            // Add to Player Table
             try
             {
-                userrepos.Create(new Model.User(cred.Username, cred.Password));
+                userrepos.Create(new Model.Credentials(cred.Username, cred.Password));
                 return true;
+
             } catch (System.Exception e)
             {
                 Console.WriteLine($"[{ DateTime.UtcNow}] - {e.Message}");
                 return false; // Registration failed
             }
-            
-            // Add Deck?
-
         }
 
         /*
@@ -51,7 +49,7 @@ namespace MonsterCardTradingGame.BL.Controller
             string passwordFromDB;
             try
             {
-                passwordFromDB = userrepos.GetPwByUsername(cred.Username);
+                passwordFromDB = userrepos.GetPasswordByUsername(cred.Username);
             }
             catch
             {
@@ -78,9 +76,17 @@ namespace MonsterCardTradingGame.BL.Controller
         }
 
 
-
-
-
+        public static Model.User GetUserByUsername(string username)
+        {
+            try
+            {
+                return userrepos.GetByName(username);
+            }
+            catch
+            {
+                throw;
+            }
+        }
 
         private static string generateToken(string username)
         {

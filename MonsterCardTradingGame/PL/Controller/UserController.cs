@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using MonsterCardTradingGame.Server;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,18 +7,21 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MonsterCardTradingGame.Server.Router
+namespace MonsterCardTradingGame.PL.Controller
 {
-    public static class Endpoints
+    public static class UserController
     {
+        /*
+         *  /register, POST
+         */
         public static HttpResponse Register(Server.HttpRequest req)
         {
             Console.WriteLine($"[{DateTime.Now}]: Register new User");
-            
+
             // String -> Json:
             var cred = JsonConvert.DeserializeObject<Utility.Json.CredentialsJson>(req.Content);
 
-            if (BL.Controller.UserController.Register(cred))
+            if (BL.Services.UserService.Register(cred))
             {
                 HttpResponse res;
                 res = new HttpResponse(HttpStatusCode.OK);
@@ -34,6 +37,9 @@ namespace MonsterCardTradingGame.Server.Router
             }
         }
 
+        /*
+        *  /login, POST
+        */
         public static HttpResponse Login(Server.HttpRequest req)
         {
             HttpResponse res;
@@ -42,7 +48,7 @@ namespace MonsterCardTradingGame.Server.Router
 
             try
             {
-                string token = BL.Controller.UserController.Login(cred);
+                string token = BL.Services.UserService.Login(cred);
 
                 if (token == "")
                 {
@@ -67,31 +73,37 @@ namespace MonsterCardTradingGame.Server.Router
             }
         }
 
-        public static HttpResponse Packages(Server.HttpRequest req)
+
+        /*
+        *  /deck, GET
+        */
+        public static HttpResponse ShowDeck(Server.HttpRequest req)
         {
-            HttpResponse res;
+            throw new NotImplementedException();
+        }
 
-            if (!Utility.Helper.AuthAdmin(req))
-            {
-                res = new HttpResponse(HttpStatusCode.Forbidden);
-                res.AddContent("application/json", "{\"error\":\"Access denied. Only admins can create packages.\"}");
-                return res;
-            }
+        /*
+         *  /deck, PUT
+         */
+        public static HttpResponse ChangeDeck(Server.HttpRequest req)
+        {
+            throw new NotImplementedException();
+        }
 
-            // Save Package bzw. Cards in Package to DB
-            // Card, Package ID/Package Name
-            var package = JsonConvert.DeserializeObject<List<Utility.Json.CardJson>>(req.Content);
+        /*
+         *  /users/username, GET
+         */
+        public static HttpResponse ShowProfile(Server.HttpRequest req)
+        {
+            throw new NotImplementedException();
+        }
 
-            foreach(Utility.Json.CardJson card_ in package)
-            {
-                Model.Card cardTemp = new Model.Card(card_.Id, card_.Name, card_.Damage);
-            }
-
-
-            // if everything worked -> return success message
-            res = new HttpResponse(HttpStatusCode.Created);
-            res.AddContent("application/json", "{\"message\":\"Package successfully created\"}");
-            return res;
-        }       
+        /*
+         *  /users/username, PUT
+         */
+        public static HttpResponse ChangeProfile(Server.HttpRequest req)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -55,15 +55,18 @@ namespace MonsterCardTradingGame.Server
             }
 
             /*
-             *  Endpoints
+             *  Endpoints, Regex?
              */
-            Console.WriteLine("Processing Msg...");
             HttpResponse res;
 
             if (httpServer.router.PostRoutes.ContainsKey(httpRequest.Path)) {
-                Console.WriteLine("Invoke the Delegate");
                 res = httpServer.router.PostRoutes[httpRequest.Path](httpRequest);
-                Console.WriteLine("done");
+            }else if (httpServer.router.GetRoutes.ContainsKey(httpRequest.Path))
+            {
+                res = httpServer.router.GetRoutes[httpRequest.Path](httpRequest);
+            }
+            else if (httpServer.router.PutRoutes.ContainsKey(httpRequest.Path)){
+                res = httpServer.router.PutRoutes[httpRequest.Path](httpRequest);
             }
             else
             {

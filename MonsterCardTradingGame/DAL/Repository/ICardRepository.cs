@@ -9,10 +9,13 @@ namespace MonsterCardTradingGame.DAL.Repository
     interface ICardRepository
     {
         void Create(Model.Card card);
-        IEnumerable<Model.Card> GetAllUser();
-        Model.Card GetByName(string name);
+        /*IEnumerable<Model.Card>*/
+        void GetAll();
+
+        List<string> GetAllCardIdsWithoutOwner();
         Model.Card GetById(int id); //DB ID
-        void UpdateUser(Model.Card card);
-        void DeleteUser(Model.Card card);
+
+        void Update(Model.Card card);
+        void Delete(Model.Card card);
     }
 }

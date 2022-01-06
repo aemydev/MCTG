@@ -8,13 +8,15 @@ namespace MonsterCardTradingGame.DAL.Repository
 {
     public interface IUserRepository
     {
-        void Create(Model.User user); //void
-        IEnumerable<Model.User> GetAllUser();
-        Model.User GetByName(string username);
-        Model.User GetById(int id); //DB ID
-        void UpdateUser(Model.User user);
-        void DeleteUser(Model.User user);
+        void Create(Model.Credentials cred); 
+        IEnumerable<Model.User> GetAll();
 
-        public string GetPwByUsername(string username);
+        Model.User GetByName(string username);
+        Model.User GetById(int id); 
+
+        void Update(Model.User user);
+        void Delete(Model.User user);
+
+        public string GetPasswordByUsername(string username);
     }
 }

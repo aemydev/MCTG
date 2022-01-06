@@ -12,9 +12,13 @@ namespace MonsterCardTradingGame
             Server.HttpServer gameServer = new Server.HttpServer(10001);
 
             // Add the Routes:
-            gameServer.router.PostRoutes.Add("/register", Server.Router.Endpoints.Register);
-            gameServer.router.PostRoutes.Add("/login", Server.Router.Endpoints.Login);
-            gameServer.router.PostRoutes.Add("/packages", Server.Router.Endpoints.Packages);
+            gameServer.router.PostRoutes.Add("/register", PL.Controller.UserController.Register);
+            gameServer.router.PostRoutes.Add("/login", PL.Controller.UserController.Login);
+            
+            gameServer.router.PostRoutes.Add("/packages", PL.Controller.CardController.AddPackage);
+            gameServer.router.PostRoutes.Add("/transactions/packages", PL.Controller.CardController.BuyPackage);
+            
+            gameServer.router.GetRoutes.Add("/cards", PL.Controller.CardController.ShowCards);
 
             gameServer.Run();
         }

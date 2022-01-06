@@ -8,7 +8,7 @@ namespace MonsterCardTradingGame.Model
 {
     class MonsterCard : Card
     {
-        public MonsterCard(string cardID, string title, int damage, string description = "") : base(cardID, title, damage, description)
+        public MonsterCard(string cardID, string title, float damage, string description) : base(cardID, title, damage, description)
         {
         }
     }

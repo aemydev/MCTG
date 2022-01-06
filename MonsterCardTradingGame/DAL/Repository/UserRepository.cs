@@ -12,13 +12,18 @@ namespace MonsterCardTradingGame.DAL.Respository
 {
     class UserRepository : IUserRepository
     {
+        DAL.Postgres.DBAccess db = DAL.Postgres.DBAccess.Instance;
+        private const string TABLE_NAME = "player"; 
+        
         /* Create */
-        public void Create(Model.User user)
+        public void Create(Model.Credentials cred)
         {
             try
             {
-                DAL.Postgres.DBAccess db = DAL.Postgres.DBAccess.Instance;
-                db.Insert(user);
+                Dictionary<string, object> keyValue = new();
+                keyValue.Add("username", cred.Username);
+                keyValue.Add("password", cred.Password);
+                db.Insert(TABLE_NAME, keyValue);
             }
             catch(System.Exception e)
             {
@@ -42,26 +47,49 @@ namespace MonsterCardTradingGame.DAL.Respository
 
         public Model.User GetByName(string username)
         {
-            using (NpgsqlConnection _connection = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432"))
+            throw new NotImplementedException();
+
+            /*
+            try
+            {
+                List<string> keys = new() { "*" };
+                Dictionary<string, string> where = new();
+                where.Add("username", username);
+
+                db.Select(TABLE_NAME, keys, where);
+            }
+            catch (System.Exception e)
+            {
+                // Sth went wrong with Creating the User(bzw. Player)
+                Console.WriteLine($"[{DateTime.UtcNow}] {e.Message} {e.GetType()}");
+                throw;
+            }
+
+
+        /*    using (NpgsqlConnection _connection = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432"))
             {
                 _connection.Open();
                 //Use Connection here 
             }
 
             return new Model.User("ines", "token");
+            */
         }
 
-        public IEnumerable<Model.User> GetAllUser()
+        public IEnumerable<Model.User> GetAll()
         {
             throw new NotImplementedException();
         }
 
-        public string GetPwByUsername(string username)
+        public string GetPasswordByUsername(string username)
         {
             try
             {
-                DAL.Postgres.DBAccess db = DAL.Postgres.DBAccess.Instance;
-                return db.SelectPwByUsername(username);
+                List<string> keys = new() { "password" };
+                string where = $"WHERE username == {username}";
+                //return db.Select(TABLE_NAME, keys, where);
+                return "";
+                
             }
             catch(Npgsql.NpgsqlException e)
             {
@@ -71,13 +99,13 @@ namespace MonsterCardTradingGame.DAL.Respository
         }
 
         /* Update */
-        public void UpdateUser(Model.User user)
+        public void Update(Model.User user)
         {
             throw new NotImplementedException();
         }
 
         /* Delete */
-        public void DeleteUser(Model.User user)
+        public void Delete(Model.User user)
         {
             throw new NotImplementedException();
         }

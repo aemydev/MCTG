@@ -10,7 +10,7 @@ namespace MonsterCardTradingGame.Model
     {
         public ElementTypes ElementType { get; set; }
 
-        SpellCard(string cardID, string title, int damage, ElementTypes elementType, string description = "")
+        public SpellCard(string cardID, string title, float damage, ElementTypes elementType, string description = "")
             : base(cardID, title, damage, description)
         {
             ElementType = elementType;

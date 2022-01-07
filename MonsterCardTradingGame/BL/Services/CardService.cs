@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.BL.Services
 {
@@ -13,27 +14,31 @@ namespace MonsterCardTradingGame.BL.Services
         /*
          *  Add new Card to DB
          */
-        public static bool AddCard(Model.Card card)
+        public static bool AddPackage(List<Model.Card> cards)
         {
             try
             {
-                Cardrepos.Create(card);
-                return true;
+                Cardrepos.CreateMultiple(cards);
             }
             catch
             {
                 return false;
             }
+
+            return true;
         }
 
         /*
          *  Show all Cards
          */
-        public static void ShowAllCards()
+        public static List<Model.Card> ShowAllCards(string username)
         {
+            Model.User user = BL.Services.UserService.GetUserByUsername(username);
+            List<Model.Card> cards = new();
             try
             {
-                Cardrepos.GetAll();
+                cards = Cardrepos.GetAllByUser(user.UserId);
+                return cards;
             }
             catch
             {
@@ -44,26 +49,37 @@ namespace MonsterCardTradingGame.BL.Services
         /*
          *  Get Package
          */
-        public static void AquirePackage(int user_id)
+        public static IEnumerable<Model.Card> AquirePackage(string username)
         {
-            
-            // Get Array of 5 Cards
-            List<string> package = Cardrepos.GetAllCardIdsWithoutOwner();
+            Console.WriteLine($"[{DateTime.UtcNow}]\tAquire new Package for \"{username}\"");
 
-            foreach(string card_id in package)
+            // Get user
+            Model.User user;
+            try
             {
-                // Update ownership of Card
-                // UPDATE card SET owner = 'calue
-               // Cardrepos.UpdateOwner();
+               user = UserService.GetUserByUsername(username);
+            }
+            catch
+            {
+                // Error Handling
+                throw new HttpException("404 Not found");
             }
 
-            // zuerst select, dann update
+            // Does user have enough coins to buy a package?
+            if(user.Coins < 5)
+            {
+                Console.WriteLine($"[{DateTime.UtcNow}]\tError: user \"{username}\" has not enough money");
+                throw new HttpException("No Money"); // Not enough coins
+            }
 
-            // SELECT * FROM card WHERE owner 
-            // Update owner of 5 cards to username 
-
-            // return aquired Package
-            
+            try
+            {
+                return Cardrepos.GetPackage(user.UserId);
+            }
+            catch
+            {
+                throw new HttpException("500 Internal Server Error");
+            }
         }
     }
 }

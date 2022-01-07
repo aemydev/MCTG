@@ -1,4 +1,5 @@
-﻿using MonsterCardTradingGame.Server;
+﻿using MonsterCardTradingGame.Model;
+using MonsterCardTradingGame.Server;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.PL.Controller
 {
@@ -19,19 +21,45 @@ namespace MonsterCardTradingGame.PL.Controller
         {
             HttpResponse res;
 
+            // Valid token?
             if (!BL.Services.AuthService.Auth(req))
             {
+                // no -> send error response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
                 res.AddContent("application/json", "{\"message\":\"Access denied. Please Login.\"}");
                 return res;
             }
+
             string token = req.Headers["Authorization"]; // no check required, because if token would not exits, if above would have failed
             string username = BL.Services.AuthService.getUserNameFromToken(token);
+            List<Card> cards = new();
 
-            BL.Services.CardService.ShowAllCards();
+            try
+            {
+                //cards = BL.Services.CardService.ShowAllCards();
+            }
+            catch(HttpException e) when (e.Message == "no cards")
+            {
+                // User has no cards
+                res = new HttpResponse(HttpStatusCode.NotFound);
+                res.AddContent("application/json", "{\"message\":\"User does not own any cards.\"}");
+                return res;
+            }
+            catch
+            {
+                res = new HttpResponse(HttpStatusCode.InternalServerError);
+                res.AddContent("application/json", "{\"message\":\"Something went wrong. Please try again.\"}");
+                return res;
+            }
 
-            res = new HttpResponse(HttpStatusCode.Forbidden);
-            res.AddContent("application/json", "{\"message\":\"Happy Peppy.\"}");
+            // Success -> send cards
+            res = new HttpResponse(HttpStatusCode.OK);
+
+            // Generate Json from cards
+
+
+
+            res.AddContent("application/json", "{\"message\":\"Success!\"}");
             return res;
         }
 
@@ -42,49 +70,42 @@ namespace MonsterCardTradingGame.PL.Controller
         public static HttpResponse AddPackage(Server.HttpRequest req)
         {
             HttpResponse res;
-
+            
+            // Valid token? username == admin? -> only "admin" can create new packages
             if (!BL.Services.AuthService.AuthAdmin(req))
             {
+                // Send Error Response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
                 res.AddContent("application/json", "{\"error\":\"Access denied. Only admins can create packages.\"}");
                 return res;
             }
 
-            // Save Package bzw. Cards in Package to DB
-            // Card, Package ID/Package Name
+            List<Card> cards = new();
+
+            // String -> Json (Content)
             var package = JsonConvert.DeserializeObject<List<Utility.Json.CardJson>>(req.Content);
 
-            foreach(Utility.Json.CardJson card_ in package)
-            {
-                if(card_.Type == "Monster")
-                {
-                    Model.Card cardTemp = new Model.MonsterCard(card_.Id, card_.Name, card_.Damage, card_.Description);
-                    if (!BL.Services.CardService.AddCard(cardTemp))
-                    {
-                        // if everything worked -> return success message
-                        res = new HttpResponse(HttpStatusCode.Conflict);
-                        res.AddContent("application/json", "{\"message\":\"Error creating Package.\"}");
-                        return res;
-                    }
-                }
-                else
-                {
-                    Model.Card cardTemp = new Model.SpellCard(card_.Id, card_.Name, card_.Damage, card_.ElementType, card_.Description);
-                    if (!BL.Services.CardService.AddCard(cardTemp))
-                    {
-                        // if everything worked -> return success message
-                        res = new HttpResponse(HttpStatusCode.Conflict);
-                        res.AddContent("application/json", "{\"message\":\"Error creating Package.\"}");
-                        return res;
-                    }
-                }
+            // CardJson -> Json
+            foreach(Utility.Json.CardJson jsoncard in package)
+            {       
+               cards.Add(new Model.Card(Guid.NewGuid(), jsoncard.Name, jsoncard.Description, jsoncard.Damage, (CardTypes)jsoncard.Type, (ElementTypes)jsoncard.ElementType));        
             }
-            // if everything worked -> return success message
-            res = new HttpResponse(HttpStatusCode.Created);
-            res.AddContent("application/json", "{\"message\":\"Package successfully created\"}");
-            return res;
-        }       
-        
+
+            if (BL.Services.CardService.AddPackage(cards))
+            {
+                // if everything worked -> return success message
+                res = new HttpResponse(HttpStatusCode.Created);
+                res.AddContent("application/json", "{\"message\":\"Package successfully created.\"}");
+                return res;
+            }
+            else
+            {  
+                res = new HttpResponse(HttpStatusCode.InternalServerError);
+                res.AddContent("application/json", "{\"message\":\"Error creating Package. Please try again.\"}");
+                return res;
+            }
+        }
+
         /*
          *  /transactions/packages, POST
          *  Aquire new Package (5 Cards)
@@ -92,6 +113,7 @@ namespace MonsterCardTradingGame.PL.Controller
         public static HttpResponse BuyPackage(Server.HttpRequest req)
         {
             HttpResponse res;
+            IEnumerable<Card> cards;
 
             if (!BL.Services.AuthService.Auth(req))
             {
@@ -102,14 +124,24 @@ namespace MonsterCardTradingGame.PL.Controller
 
             // Get Username from Token
             string username = BL.Services.AuthService.getUserNameFromToken(req.Headers["Authorization"]);
-            Console.WriteLine($"Username from Token: {username}");
-            // Get User_ID from username
-            Model.User user = BL.Services.UserService.GetUserByUsername(username);
-            
-            //BL.Controller.CardController.AquirePackage(username);
 
+            // Error Handlingtry{try
+            try{
+               cards =  BL.Services.CardService.AquirePackage(username);
+            }
+            catch
+            {
+                res = new HttpResponse(HttpStatusCode.Conflict);
+                res.AddContent("application/json", "{\"message\":\"Something went wrong.\"}");
+                return res;
+            }
+
+
+            string jsonString = JsonConvert.SerializeObject(cards);
+
+       
             res = new HttpResponse(HttpStatusCode.OK);
-            res.AddContent("application/json", "{\"message\":\"Access denied.\"}");
+            res.AddContent("application/json", $"{{\"message\":\"Package successfully aquired\",\"content\":{jsonString}}}");
             return res;
         }
 

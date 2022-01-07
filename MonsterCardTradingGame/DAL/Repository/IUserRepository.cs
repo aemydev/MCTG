@@ -12,11 +12,9 @@ namespace MonsterCardTradingGame.DAL.Repository
         IEnumerable<Model.User> GetAll();
 
         Model.User GetByName(string username);
-        Model.User GetById(int id); 
+        Model.User GetById(Guid id); 
 
         void Update(Model.User user);
         void Delete(Model.User user);
-
-        public string GetPasswordByUsername(string username);
     }
 }

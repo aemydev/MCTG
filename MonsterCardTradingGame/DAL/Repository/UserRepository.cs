@@ -7,94 +7,149 @@ using System.Text;
 using System.Threading.Tasks;
 using Npgsql;
 using System.Data;
+using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.DAL.Respository
 {
     class UserRepository : IUserRepository
     {
-        DAL.Postgres.DBAccess db = DAL.Postgres.DBAccess.Instance;
-        private const string TABLE_NAME = "player"; 
-        
-        /* Create */
+        DAL.Postgres.PostgresAccess db = DAL.Postgres.PostgresAccess.Instance;
+        private const string TABLE_NAME = "player";
+
+        /* 
+         * Create
+         */
         public void Create(Model.Credentials cred)
         {
+            Console.WriteLine($"[{DateTime.UtcNow}]\tCreate new user \"{cred.Username}\"");
+            
+            string sql = $"INSERT INTO {TABLE_NAME} (user_id, username, password) VALUES (@user_id, @username, @password)";
             try
             {
-                Dictionary<string, object> keyValue = new();
-                keyValue.Add("username", cred.Username);
-                keyValue.Add("password", cred.Password);
-                db.Insert(TABLE_NAME, keyValue);
-            }
-            catch(System.Exception e)
+                using (var command = db.GetConnection().CreateCommand())
+                {
+                    command.CommandText = sql;
+                    command.Parameters.AddWithValue("@user_id", Guid.NewGuid());
+                    command.Parameters.AddWithValue($"@username", cred.Username);
+                    command.Parameters.AddWithValue($"@password", cred.Password);
+                    command.ExecuteNonQuery();
+                }
+            }catch(PostgresException e) when (e.SqlState == "23505") // User already exists
             {
-                // Sth went wrong with Creating the User(bzw. Player)
-                Console.WriteLine($"[{DateTime.UtcNow}] {e.Message} {e.GetType()}");
-                throw;
-            }
-       
-        }
-
-        /* Read */
-        public bool UserExistsByUsername(string username)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Model.User GetById(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Model.User GetByName(string username)
-        {
-            throw new NotImplementedException();
-
-            /*
-            try
-            {
-                List<string> keys = new() { "*" };
-                Dictionary<string, string> where = new();
-                where.Add("username", username);
-
-                db.Select(TABLE_NAME, keys, where);
+                Console.WriteLine($"[{DateTime.UtcNow}]\tError creating new user \"{cred.Username}\"\n{e.Message}");
+                throw new RepositoryException("User already exists");
             }
             catch (System.Exception e)
             {
-                // Sth went wrong with Creating the User(bzw. Player)
-                Console.WriteLine($"[{DateTime.UtcNow}] {e.Message} {e.GetType()}");
-                throw;
+                Console.WriteLine($"[{DateTime.UtcNow}]\tError creating new user ({cred.Username}), {e.Message}");
+                throw new RepositoryException("Error");
             }
+        }
 
+        /*
+         *  Read
+         */
+        public Model.User GetByName(string _username)
+        {
+            Console.WriteLine($"[{DateTime.UtcNow}]\tGet user \"{_username}\"");
 
-        /*    using (NpgsqlConnection _connection = new NpgsqlConnection("Host = localhost; Username=postgres;Password=ines;Database=test;Port=5432"))
+            string sql = $"SELECT * FROM {TABLE_NAME} WHERE username=@username;";
+            try
             {
-                _connection.Open();
-                //Use Connection here 
-            }
+                using (var command = db.GetConnection().CreateCommand())
+                {
+                    command.CommandText = sql;
+                    command.Parameters.AddWithValue($"@username", _username);
 
-            return new Model.User("ines", "token");
-            */
+                    using NpgsqlDataReader reader = command.ExecuteReader();
+
+                    string username, userid, password;
+                    int coins;
+
+                    reader.Read();
+                    userid = reader.GetString(0);
+                    username = reader.GetString(1);
+                    password = reader.GetString(2);
+                    coins = reader.GetInt32(3);
+
+                    return new Model.User(Guid.Parse(userid), username, password, coins);
+                }
+            }catch (System.Exception e) when (e.Message == "No row is available")
+            {
+                Console.WriteLine($"[{DateTime.UtcNow}]\tUser \"{_username}\" does not exist.");
+                throw new RepositoryException("User does not exist");
+            }
+            catch(System.Exception e)
+            {
+                Console.WriteLine($"[{DateTime.UtcNow}]\tCould not get \"{_username}\", {e.Message}");
+                throw new RepositoryException("Error");
+            }
         }
 
         public IEnumerable<Model.User> GetAll()
         {
-            throw new NotImplementedException();
-        }
-
-        public string GetPasswordByUsername(string username)
-        {
+            string sql = $"SELECT * FROM {TABLE_NAME};";
             try
             {
-                List<string> keys = new() { "password" };
-                string where = $"WHERE username == {username}";
-                //return db.Select(TABLE_NAME, keys, where);
-                return "";
-                
+                using (var command = db.GetConnection().CreateCommand())
+                {
+                    command.CommandText = sql;
+                    using NpgsqlDataReader reader = command.ExecuteReader();
+
+                    string username, password, userId;
+                    int coins;
+
+                    List<Model.User> users = new();
+
+                    while (reader.Read())
+                    {
+                        userId = reader.GetString(0);
+                        username = reader.GetString(1);
+                        password = reader.GetString(2);
+                        coins = reader.GetInt32(3);
+
+                        users.Add(new Model.User(Guid.Parse(userId), username, password, coins));
+                    }
+
+                    return users;
+                }
             }
-            catch(Npgsql.NpgsqlException e)
+            catch (System.Exception e)
             {
-                Console.WriteLine($"{DateTime.UtcNow}] {e.Message}");
-                throw;
+                Console.WriteLine(e.Message);
+                throw; // Better Error Handeling
+            }
+        }
+
+        
+        public Model.User GetById(Guid userid)
+        {
+            string sql = $"SELECT * FROM {TABLE_NAME} WHERE user_id=@user_id;";
+            try
+            {
+                using (var command = db.GetConnection().CreateCommand())
+                {
+                    command.CommandText = sql;
+                    command.Parameters.AddWithValue($"@user_id", userid);
+
+                    using NpgsqlDataReader reader = command.ExecuteReader();
+
+                    string username, userId, password;
+                    int coins;
+
+                    reader.Read();
+                    userId = reader.GetString(0);
+                    username = reader.GetString(1);
+                    password = reader.GetString(2);
+                    coins = reader.GetInt32(3);
+
+                    return new Model.User(Guid.Parse(userId), username, password, coins);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw; // Better Error Handeling
             }
         }
 

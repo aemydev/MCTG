@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.BL.Services
 {
@@ -19,6 +20,8 @@ namespace MonsterCardTradingGame.BL.Services
          */
         public static bool Register(Utility.Json.CredentialsJson cred)
         {
+            // Validate username
+            // 
             // Hash the Password
             cred.Password = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 cred.Password,
@@ -33,12 +36,14 @@ namespace MonsterCardTradingGame.BL.Services
             {
                 userrepos.Create(new Model.Credentials(cred.Username, cred.Password));
                 return true;
-
-            } catch (System.Exception e)
-            {
-                Console.WriteLine($"[{ DateTime.UtcNow}] - {e.Message}");
-                return false; // Registration failed
             }
+            catch(RepositoryException e) when (e.Message == "User already exists")
+            {
+                throw new HttpException("409 Conflict");
+            }
+            catch (System.Exception) {
+                throw new HttpException("500 Interal Server Error");
+            }           
         }
 
         /*
@@ -49,11 +54,15 @@ namespace MonsterCardTradingGame.BL.Services
             string passwordFromDB;
             try
             {
-                passwordFromDB = userrepos.GetPasswordByUsername(cred.Username);
+                Model.User user = userrepos.GetByName(cred.Username);
+                passwordFromDB = user.Password;
             }
-            catch
+            catch(RepositoryException e) when(e.Message == "User does not exist")
             {
-                return ""; // sth went wrong with the DB, user might not exist
+                throw new HttpException("404 Not Found"); 
+            }catch
+            {
+                throw new HttpException("500 Internal Server Error");
             }
 
             // Hash the pw the user entered:
@@ -71,10 +80,9 @@ namespace MonsterCardTradingGame.BL.Services
             }
             else
             {
-                return ""; // Incorrect Password -> no token returned
+                throw new HttpException("401 Unauthorized");
             }
         }
-
 
         public static Model.User GetUserByUsername(string username)
         {
@@ -88,6 +96,10 @@ namespace MonsterCardTradingGame.BL.Services
             }
         }
 
+
+        /*
+         *  Helper
+         */
         private static string generateToken(string username)
         {
             string token = $"Basic {username}-mctgToken";

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonsterCardTradingGame.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,14 +9,20 @@ namespace MonsterCardTradingGame.DAL.Repository
 {
     interface ICardRepository
     {
-        void Create(Model.Card card);
-        /*IEnumerable<Model.Card>*/
-        void GetAll();
+        // Create
+        //void Create(Card card);
+        public void CreateMultiple(List<Card> cards);
 
-        List<string> GetAllCardIdsWithoutOwner();
-        Model.Card GetById(int id); //DB ID
+        // Read
+        // IEnumerable<Card> GetAll();
+        public List<Card> GetAllByUser(Guid userid);
+        //void GetById(Guid id);
 
-        void Update(Model.Card card);
-        void Delete(Model.Card card);
+        // Update
+        //void UpdateOwner(Guid cardid, Guid userid);
+        List<Card> GetPackage(Guid userid); // meh
+
+        // Delete
+        //void Delete(Card card);
     }
 }

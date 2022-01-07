@@ -32,6 +32,8 @@ namespace MonsterCardTradingGame.Server
             StreamWriter writer = new StreamWriter(socket.GetStream()) { AutoFlush = true };
             NetworkStream reader = socket.GetStream();
 
+            Console.WriteLine($"[{DateTime.UtcNow}]\tClient connected.");
+
             /*
              *  Parse the Request
              */

@@ -34,6 +34,9 @@ namespace MonsterCardTradingGame.Server
             StatusCodeString.Add(HttpStatusCode.Conflict, "409");
             StatusCodeString.Add(HttpStatusCode.NotFound, "404");
             StatusCodeString.Add(HttpStatusCode.Forbidden, "403");
+            StatusCodeString.Add(HttpStatusCode.InternalServerError, "500");
+            StatusCodeString.Add(HttpStatusCode.Unauthorized, "401");
+
         }
 
         public void addHeader(string key, string value)
@@ -59,6 +62,8 @@ namespace MonsterCardTradingGame.Server
             Leerzeile (!)
             Resource Entity (falls vorhanden)
             */
+
+            Console.WriteLine($"[{DateTime.UtcNow}]\tSend HTTP-Response, Statuscode: {StatusCode}");
 
             // If there is no content -> Content-Length = 0
             string responseContent = Content == null ? "0" : Content;
@@ -90,7 +95,7 @@ namespace MonsterCardTradingGame.Server
             WriteLine(writer, ""); 
 
             WriteLine(writer, responseContent); // only if set
-
+            
             writer.WriteLine();
             writer.Flush();
             writer.Close();
@@ -101,7 +106,7 @@ namespace MonsterCardTradingGame.Server
         */
         private void WriteLine(StreamWriter writer, string s)
         {
-            Console.WriteLine(s);
+            //Console.WriteLine(s);
             writer.WriteLine(s);
         }
     }

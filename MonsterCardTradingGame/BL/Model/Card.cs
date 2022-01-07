@@ -6,22 +6,28 @@ using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Model
 {
-    enum ElementTypes {Normal, Water, Fire}
+    public enum ElementTypes {Normal, Water, Fire}
+    public enum CardTypes { Spell, Monster }
 
-    public abstract class Card
+    public class Card
     {
-        public string CardID { get; set; }
+        public Guid CardID { get; set; }
         public string Title { get; set; }
-        public float Damage {get; init;}
+        public int Damage {get; init;}
         public string Description { get; set; }
-        public int OwnerID { get; set; }
+        public CardTypes Type { get; set; }
+        public ElementTypes ElementType { get; set; }
+        public Guid? OwnerId { get; set; } // nullable, because card can have no owner
 
-        public Card(string cardID, string cardName, float damage, string description = "")
+        public Card(Guid cardid, string cardName, string description, float damage, CardTypes cardType, ElementTypes elementType, Guid? ownerid=null)
         {
-            CardID = cardID;
+            CardID = cardid;
             Title = cardName;
             Damage = Damage;
             Description = description;
+            Type = cardType;
+            ElementType = elementType;
+            OwnerId = ownerid;
         }
     }
 }

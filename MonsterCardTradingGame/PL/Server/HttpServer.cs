@@ -29,7 +29,7 @@ namespace MonsterCardTradingGame.Server
             listener = new TcpListener(IPAddress.Loopback, port);
             listener.Start(5); // Queue of 5
 
-            Console.WriteLine("Server running...");
+            Console.WriteLine($"[{DateTime.UtcNow}]\tServer started. Waiting for connections...");
 
             while (true)
             {
@@ -37,7 +37,7 @@ namespace MonsterCardTradingGame.Server
 
                 HttpProcessor processor = new HttpProcessor(sock, this);
 
-                new Thread(processor.Process).Start(); // Tasks?
+                new Thread(processor.Process).Start(); 
 
                 Thread.Sleep(1);
             }

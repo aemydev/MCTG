@@ -19,7 +19,7 @@ namespace MonsterCardTradingGame.Model
         public ElementTypes ElementType { get; set; }
         public Guid? OwnerId { get; set; } // nullable, because card can have no owner
 
-        public Card(Guid cardid, string cardName, string description, float damage, CardTypes cardType, ElementTypes elementType, Guid? ownerid=null)
+        public Card(Guid cardid, string cardName, string description, int damage, CardTypes cardType, ElementTypes elementType, Guid? ownerid=null)
         {
             CardID = cardid;
             Title = cardName;

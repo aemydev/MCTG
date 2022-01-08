@@ -20,13 +20,13 @@ namespace MonsterCardTradingGame.PL.Controller
         public static HttpResponse ShowCards(Server.HttpRequest req)
         {
             HttpResponse res;
-
+            
             // Valid token?
             if (!BL.Services.AuthService.Auth(req))
             {
                 // no -> send error response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
-                res.AddContent("application/json", "{\"message\":\"Access denied. Please Login.\"}");
+                res.AddContent("application/json", "{\"message\":\"Access denied. Token invalid.\"}");
                 return res;
             }
 
@@ -36,7 +36,7 @@ namespace MonsterCardTradingGame.PL.Controller
 
             try
             {
-                //cards = BL.Services.CardService.ShowAllCards();
+                cards = BL.Services.CardService.ShowAllCards(username);
             }
             catch(HttpException e) when (e.Message == "no cards")
             {
@@ -53,13 +53,9 @@ namespace MonsterCardTradingGame.PL.Controller
             }
 
             // Success -> send cards
+            string jsonString = JsonConvert.SerializeObject(cards);
             res = new HttpResponse(HttpStatusCode.OK);
-
-            // Generate Json from cards
-
-
-
-            res.AddContent("application/json", "{\"message\":\"Success!\"}");
+            res.AddContent("application/json", $"{{\"message\":\"Success!\", \"content\":{jsonString}}}");
             return res;
         }
 
@@ -137,9 +133,7 @@ namespace MonsterCardTradingGame.PL.Controller
             }
 
 
-            string jsonString = JsonConvert.SerializeObject(cards);
-
-       
+            string jsonString = JsonConvert.SerializeObject(cards);    
             res = new HttpResponse(HttpStatusCode.OK);
             res.AddContent("application/json", $"{{\"message\":\"Package successfully aquired\",\"content\":{jsonString}}}");
             return res;

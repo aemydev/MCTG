@@ -132,7 +132,7 @@ namespace MonsterCardTradingGame.DAL.Repository
                 using (var command = db.GetConnection().CreateCommand())
                 {
                     command.CommandText = sql;
-                    command.Parameters.AddWithValue("@owner", id);
+                    command.Parameters.AddWithValue("@owner", id.ToString());
 
                     using NpgsqlDataReader reader = command.ExecuteReader();
 

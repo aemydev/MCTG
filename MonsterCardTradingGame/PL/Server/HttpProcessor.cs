@@ -40,7 +40,7 @@ namespace MonsterCardTradingGame.Server
             HttpRequest httpRequest = ParseHeader(reader);
 
             // For POST only: Parse Content
-            if (httpRequest.Method.Equals("POST"))
+            if (httpRequest.Method.Equals("POST") || httpRequest.Method.Equals("PUT"))
             {
                 if (httpRequest.Headers.ContainsKey("Content-Length"))
                 {
@@ -61,13 +61,14 @@ namespace MonsterCardTradingGame.Server
              */
             HttpResponse res;
 
-            if (httpServer.router.PostRoutes.ContainsKey(httpRequest.Path)) {
+            if (httpRequest.Method.Equals("POST") && httpServer.router.PostRoutes.ContainsKey(httpRequest.Path)) {
                 res = httpServer.router.PostRoutes[httpRequest.Path](httpRequest);
-            }else if (httpServer.router.GetRoutes.ContainsKey(httpRequest.Path))
+            }else if (httpRequest.Method.Equals("GET") && httpServer.router.GetRoutes.ContainsKey(httpRequest.Path))
             {
                 res = httpServer.router.GetRoutes[httpRequest.Path](httpRequest);
             }
-            else if (httpServer.router.PutRoutes.ContainsKey(httpRequest.Path)){
+            else if (httpRequest.Method.Equals("PUT") && httpServer.router.PutRoutes.ContainsKey(httpRequest.Path)){
+                Console.WriteLine("Test");
                 res = httpServer.router.PutRoutes[httpRequest.Path](httpRequest);
             }
             else

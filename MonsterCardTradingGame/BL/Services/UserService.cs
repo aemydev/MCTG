@@ -8,12 +8,14 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using MonsterCardTradingGame.Exceptions;
+using MonsterCardTradingGame.Model;
 
 namespace MonsterCardTradingGame.BL.Services
 {
     class UserService
     {
         static DAL.Repository.IUserRepository userrepos = new DAL.Respository.UserRepository();
+        static DAL.Repository.IDeckRepository deckrepos = new DAL.Repository.DeckRepository();
 
         /*
          *  Register a new User
@@ -47,7 +49,7 @@ namespace MonsterCardTradingGame.BL.Services
         }
 
         /*
-         *  Login User, returns Token if login successful, if not returns empty string
+         *  Login User, returns Token if login successful, otherwise Exception is thrown
          */
         public static string Login(Utility.Json.CredentialsJson cred)
         {
@@ -84,6 +86,9 @@ namespace MonsterCardTradingGame.BL.Services
             }
         }
 
+        /*
+         *  Get user via username
+         */
         public static Model.User GetUserByUsername(string username)
         {
             try
@@ -92,11 +97,99 @@ namespace MonsterCardTradingGame.BL.Services
             }
             catch
             {
-                throw;
+                throw new HttpException("not found");
+            }
+        }
+        
+        /*
+        *  Get userid via username
+        */
+        public static Guid GetIdByUsername(string username)
+        {
+            try
+            {
+                return userrepos.GetIdByUsername(username);
+            }
+            catch
+            {
+                throw new HttpException("not found");
             }
         }
 
+        #region deck
+        /*
+         *  Get active deck per deck_id
+         */
+        public static Deck GetActiveDeck(Guid deck_id)
+        {
+            try
+            {
+                return deckrepos.GetDeckById(deck_id);
+            }
+            catch
+            {
+                throw; // Something went wrong
+            }
+        }
 
+        /*
+         *  Show all decks of user, returns List<Deck> decks
+         */
+        public static List<Deck> GetAllDecks(Guid userid)
+        {
+            try
+            {
+                return deckrepos.GetAll(userid);
+            }
+            catch
+            {
+                throw;
+            }
+            
+            
+            throw new NotImplementedException();
+        }
+
+        /*
+        *  Set active deck of user to deck_id
+        */
+        public static void SetActiveDeck(Guid userid, Guid deck_id)
+        {
+            // Set active deck in player_tablet
+            try
+            {
+                userrepos.UpdateDeck(userid, deck_id);
+            }
+            catch { 
+                throw; // Update failed
+            }
+        }
+
+        /*
+        *  Add new deck to decks-table
+        */
+        public static void AddNewDeck(Utility.Json.DeckJson deck, Guid owner)
+        {
+            Console.WriteLine($"[{DateTime.UtcNow}]\tCreate new Deck \"{deck.Title}\" ");
+
+            // Validate, only 5 cards per deck
+            if(deck.Cards.Length != 5)
+            {
+                throw new HttpException("invalid card count");
+            }
+
+            try
+            {
+                deckrepos.AddDeck(deck, owner);
+            }
+            catch
+            {
+                throw new HttpException("not found");
+            }
+        }
+        
+        #endregion
+        #region helper
         /*
          *  Helper
          */
@@ -105,5 +198,6 @@ namespace MonsterCardTradingGame.BL.Services
             string token = $"Basic {username}-mctgToken";
             return token;
         }
+        #endregion
     }
 }

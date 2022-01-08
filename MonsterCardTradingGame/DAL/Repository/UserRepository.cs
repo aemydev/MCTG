@@ -49,39 +49,46 @@ namespace MonsterCardTradingGame.DAL.Respository
         /*
          *  Read
          */
-        public Model.User GetByName(string _username)
+        public Model.User GetByName(string username)
         {
-            Console.WriteLine($"[{DateTime.UtcNow}]\tGet user \"{_username}\"");
+            Console.WriteLine($"[{DateTime.UtcNow}]\tGet user \"{username}\"");
 
-            string sql = $"SELECT * FROM {TABLE_NAME} WHERE username=@username;";
             try
             {
                 using (var command = db.GetConnection().CreateCommand())
                 {
+                    string sql = $"SELECT user_id, username, password, coins, active_deck FROM {TABLE_NAME} WHERE username=@username;";
+                    Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
                     command.CommandText = sql;
-                    command.Parameters.AddWithValue($"@username", _username);
-
+                    command.Parameters.AddWithValue($"@username", username);
                     using NpgsqlDataReader reader = command.ExecuteReader();
 
-                    string username, userid, password;
-                    int coins;
-
                     reader.Read();
-                    userid = reader.GetString(0);
-                    username = reader.GetString(1);
-                    password = reader.GetString(2);
-                    coins = reader.GetInt32(3);
+                    string _userid = reader.GetString(0);
+                    string _username = reader.GetString(1);
+                    string _password = reader.GetString(2);
+                    int _coins = reader.GetInt32(3);
+                    var _active_deck = reader.GetValue(4);
 
-                    return new Model.User(Guid.Parse(userid), username, password, coins);
+                    if(_active_deck.ToString() == "")
+                    {
+                        return new Model.User(Guid.Parse(_userid), _username, _password, _coins);
+                    }
+                    else
+                    {
+                        string deckid = _active_deck.ToString();
+                        return new Model.User(Guid.Parse(_userid), _username, _password, _coins, (Guid)Guid.Parse(deckid));
+                    }
                 }
             }catch (System.Exception e) when (e.Message == "No row is available")
             {
-                Console.WriteLine($"[{DateTime.UtcNow}]\tUser \"{_username}\" does not exist.");
+                Console.WriteLine($"[{DateTime.UtcNow}]\tUser \"{username}\" does not exist.");
                 throw new RepositoryException("User does not exist");
             }
             catch(System.Exception e)
             {
-                Console.WriteLine($"[{DateTime.UtcNow}]\tCould not get \"{_username}\", {e.Message}");
+                Console.WriteLine("Errror");
+                Console.WriteLine($"[{DateTime.UtcNow}]\tCould not get \"{username}\", {e.Message}");
                 throw new RepositoryException("Error");
             }
         }
@@ -121,6 +128,33 @@ namespace MonsterCardTradingGame.DAL.Respository
             }
         }
 
+        public Guid GetIdByUsername(string username)
+        {
+            Console.WriteLine($"[{DateTime.UtcNow}]\tGet userid for \"{username}\"");
+
+            try
+            {
+                using (var command = db.GetConnection().CreateCommand())
+                {
+                    string sql = $"SELECT user_id FROM {TABLE_NAME} WHERE username=@username;";
+                    command.CommandText = sql;
+                    Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
+                    command.Parameters.AddWithValue($"@username", username);
+                    string userid = command.ExecuteScalar().ToString();
+                    return Guid.Parse(userid);
+                }
+            }
+            catch (System.Exception e) when (e.Message == "No row is available")
+            {
+                Console.WriteLine($"[{DateTime.UtcNow}]\tUser \"{username}\" does not exist.");
+                throw new RepositoryException("User does not exist");
+            }
+            catch (System.Exception e)
+            {
+                Console.WriteLine($"[{DateTime.UtcNow}]\tCould not get \"{username}\", {e.Message}");
+                throw new RepositoryException("Error");
+            }
+        }
         
         public Model.User GetById(Guid userid)
         {
@@ -157,6 +191,28 @@ namespace MonsterCardTradingGame.DAL.Respository
         public void Update(Model.User user)
         {
             throw new NotImplementedException();
+        }
+
+        public void UpdateDeck(Guid userid, Guid deckid)
+        {
+            try
+            {
+                using (var command = db.GetConnection().CreateCommand())
+                {
+                    string sql = $"UPDATE {TABLE_NAME} SET active_deck=@deck_id WHERE user_id=@user_id;";
+                    Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
+                    command.CommandText = sql;
+                    command.Parameters.AddWithValue($"@deck_id", deckid.ToString());
+                    command.Parameters.AddWithValue($"@user_id", userid.ToString());
+                    var affectedRows = command.ExecuteNonQuery();
+                    Console.WriteLine($"[{DateTime.UtcNow}]\tAffected rows: {affectedRows}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw; // Better Error Handeling
+            }
         }
 
         /* Delete */

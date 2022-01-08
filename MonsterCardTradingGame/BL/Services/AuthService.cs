@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.BL.Services
 {
@@ -28,15 +29,13 @@ namespace MonsterCardTradingGame.BL.Services
                     string[] tokenSplit = token.Split(' ');
                     string[] tokenSplit2 = tokenSplit[1].Split('-');
 
-                    Console.WriteLine(tokenSplit2[0]);
-
-                    // Check if User exists in DB
-
-
+                    Console.WriteLine($"[{DateTime.UtcNow}]\tToken \"{token}\" valid");
                     return true;
+
                 }
             }
 
+            Console.WriteLine($"[{DateTime.UtcNow}]\tToken invalid");
             return false;
         }
         

@@ -7,6 +7,9 @@ using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.BL.Services
 {
+    /*
+     *  
+     */
     class CardService
     {
         static DAL.Repository.ICardRepository Cardrepos = new DAL.Repository.CardRepository();
@@ -35,6 +38,7 @@ namespace MonsterCardTradingGame.BL.Services
         {
             Model.User user = BL.Services.UserService.GetUserByUsername(username);
             List<Model.Card> cards = new();
+
             try
             {
                 cards = Cardrepos.GetAllByUser(user.UserId);

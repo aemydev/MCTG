@@ -28,15 +28,6 @@ namespace MonsterCardTradingGame
             Console.WriteLine("");
 
 
-
-
-
-
-
-
-
-
-
             Server.HttpServer gameServer = new Server.HttpServer(10001);
 
             // Add the Routes:
@@ -47,6 +38,18 @@ namespace MonsterCardTradingGame
             gameServer.router.PostRoutes.Add("/transactions/packages", PL.Controller.CardController.BuyPackage);
             
             gameServer.router.GetRoutes.Add("/cards", PL.Controller.CardController.ShowCards);
+
+            // Show active deck:
+            gameServer.router.GetRoutes.Add("/deck", PL.Controller.UserController.ShowActiveDeck);
+            
+            // Show all decks created by user:
+            gameServer.router.GetRoutes.Add("/deck/all", PL.Controller.UserController.ShowAllDecks);
+            
+            // Add new deck, Content: Card_ids of Cards to add to deck
+            gameServer.router.PostRoutes.Add("/deck/add", PL.Controller.UserController.AddNewDeck);
+            
+            // Set new active deck (Content: deck_id)
+            gameServer.router.PutRoutes.Add("/deck", PL.Controller.UserController.SetActiveDeck);
 
             gameServer.Run();
         }

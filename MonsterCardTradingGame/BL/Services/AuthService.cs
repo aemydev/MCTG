@@ -38,7 +38,57 @@ namespace MonsterCardTradingGame.BL.Services
             Console.WriteLine($"[{DateTime.UtcNow}]\tToken invalid");
             return false;
         }
-        
+
+
+        /*
+        * Validate Token 
+        */
+        public static bool AuthToken(HttpRequest req, out string username, out Guid userid)
+        {
+            // Default values for out paramaters
+            username = "";
+            userid = Guid.Empty;
+
+            // Check if Header is set
+            if (req.Headers.ContainsKey("Authorization"))
+            {
+                string token = req.Headers["Authorization"];
+
+                // Check format:
+                if (Regex.IsMatch(token, TOKEN_PATTERN) == true)
+                {
+                    // Split the token and check is user exists in db:
+                    string[] tokenSplitBySpace = token.Split(' ');
+                    string[] tokenSplitByDash = tokenSplitBySpace[1].Split('-');
+                    string username_ = tokenSplitByDash[0];
+                    Guid userid_;
+
+                    try
+                    {
+                        userid_ = BL.Services.UserService.GetIdByUsername(username_);
+                    }
+                    catch
+                    {
+                        username = "";
+                        userid = Guid.Empty;
+                        Console.WriteLine($"[{DateTime.UtcNow}]\tAuthorization failed: User does not exist");
+                        return false;
+                    }
+
+                    Console.WriteLine($"[{DateTime.UtcNow}]\tToken \"{token}\" is valid for \"{userid_}: {username_}\"");
+                    username = username_;
+                    userid = userid_;
+                    return true;
+
+                }
+                Console.WriteLine($"[{DateTime.UtcNow}]\tAuthorization failed: Unknown token format");
+            }
+
+            Console.WriteLine($"[{DateTime.UtcNow}]\tAuthorization failed: Token not set");  
+            return false;
+        }
+
+
         /*
         *  Check if token is "admin-Token"
         */

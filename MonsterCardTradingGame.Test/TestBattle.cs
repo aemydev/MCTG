@@ -2,27 +2,22 @@ using NUnit.Framework;
 
 namespace MonsterCardTradingGame.Test
 {
-    public class TestLoginEndpoint
+    public class TestBattle
     {
         [SetUp]
         public void Setup()
         {
+
         }
 
         [Test]
-        public void Login_correctCredentials()
+        public void testStart_pureMonster()
         {
             Assert.Pass();
         }
 
         [Test]
-        public void Login_wrongPassword()
-        {
-            Assert.Pass();
-        }
-
-        [Test]
-        public void Login_userDoesNotExist()
+        public void testStart_pureSpell()
         {
             Assert.Pass();
         }

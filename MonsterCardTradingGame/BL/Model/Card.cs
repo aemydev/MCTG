@@ -13,7 +13,7 @@ namespace MonsterCardTradingGame.Model
     {
         public Guid CardID { get; set; }
         public string Title { get; set; }
-        public int Damage {get; init;}
+        public int Damage { get; set; }
         public string Description { get; set; }
         public CardTypes Type { get; set; }
         public ElementTypes ElementType { get; set; }
@@ -23,7 +23,7 @@ namespace MonsterCardTradingGame.Model
         {
             CardID = cardid;
             Title = cardName;
-            Damage = Damage;
+            Damage = damage;
             Description = description;
             Type = cardType;
             ElementType = elementType;

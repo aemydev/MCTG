@@ -58,7 +58,7 @@ namespace MonsterCardTradingGame.DAL.Respository
                 using (var command = db.GetConnection().CreateCommand())
                 {
                     string sql = $"SELECT user_id, username, password, coins, active_deck FROM {TABLE_NAME} WHERE username=@username;";
-                    Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
+                    //Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
                     command.CommandText = sql;
                     command.Parameters.AddWithValue($"@username", username);
                     using NpgsqlDataReader reader = command.ExecuteReader();
@@ -138,7 +138,7 @@ namespace MonsterCardTradingGame.DAL.Respository
                 {
                     string sql = $"SELECT user_id FROM {TABLE_NAME} WHERE username=@username;";
                     command.CommandText = sql;
-                    Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
+                    //Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
                     command.Parameters.AddWithValue($"@username", username);
                     string userid = command.ExecuteScalar().ToString();
                     return Guid.Parse(userid);
@@ -200,7 +200,7 @@ namespace MonsterCardTradingGame.DAL.Respository
                 using (var command = db.GetConnection().CreateCommand())
                 {
                     string sql = $"UPDATE {TABLE_NAME} SET active_deck=@deck_id WHERE user_id=@user_id;";
-                    Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
+                    //Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
                     command.CommandText = sql;
                     command.Parameters.AddWithValue($"@deck_id", deckid.ToString());
                     command.Parameters.AddWithValue($"@user_id", userid.ToString());

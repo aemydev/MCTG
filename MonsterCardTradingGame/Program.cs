@@ -1,10 +1,15 @@
-﻿using System;
+﻿using MonsterCardTradingGame.Model;
+using System;
+using System.Collections.Concurrent;
 using System.Net;
 
 namespace MonsterCardTradingGame
 {
     class Program
     {
+        public static ConcurrentDictionary<Guid, Model.Battle> battles = new();
+        public static ConcurrentQueue<BattleRequest> BattleRequest = new();
+
         static void Main(string[] args)
         {
             Console.WriteLine("MMMMMMMM               MMMMMMMM         CCCCCCCCCCCCC TTTTTTTTTTTTTTTTTTTTTTT        GGGGGGGGGGGGG");
@@ -23,7 +28,6 @@ namespace MonsterCardTradingGame
             Console.WriteLine("M::::::M               M::::::M    CC:::::::::::::::C       T:::::::::T         GG:::::::::::::::G");
             Console.WriteLine("M::::::M               M::::::M      CCC::::::::::::C       T:::::::::T           GGG::::::GGG:::G");
             Console.WriteLine("MMMMMMMM               MMMMMMMM         CCCCCCCCCCCCC       TTTTTTTTTTT              GGGGGGGGGGG");
-
             Console.WriteLine("");
             Console.WriteLine("");
 
@@ -44,12 +48,17 @@ namespace MonsterCardTradingGame
             
             // Show all decks created by user:
             gameServer.router.GetRoutes.Add("/deck/all", PL.Controller.UserController.ShowAllDecks);
-            
+           
             // Add new deck, Content: Card_ids of Cards to add to deck
             gameServer.router.PostRoutes.Add("/deck/add", PL.Controller.UserController.AddNewDeck);
-            
             // Set new active deck (Content: deck_id)
             gameServer.router.PutRoutes.Add("/deck", PL.Controller.UserController.SetActiveDeck);
+            
+            // Running Battles
+            gameServer.router.GetRoutes.Add("/battle/find", PL.Controller.GameController.JoinBattle);
+
+            // Battle Requests Battles
+            gameServer.router.GetRoutes.Add("/battle/new", PL.Controller.GameController.NewBattle);
 
             gameServer.Run();
         }

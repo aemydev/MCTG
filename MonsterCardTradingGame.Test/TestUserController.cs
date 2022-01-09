@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MonsterCardTradingGame.BL.Services
+namespace MonsterCardTradingGame.Test
 {
-    class BattleService
+    class TestUserController
     {
     }
 }

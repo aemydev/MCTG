@@ -3,10 +3,7 @@ using MonsterCardTradingGame.Server;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.PL.Controller
@@ -17,7 +14,7 @@ namespace MonsterCardTradingGame.PL.Controller
          *  /cards, GET
          *  Show all Cards for User
          */
-        public static HttpResponse ShowCards(Server.HttpRequest req)
+        public static HttpResponse ShowCards(HttpRequest req)
         {
             HttpResponse res;
             
@@ -30,8 +27,7 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-            string token = req.Headers["Authorization"]; // no check required, because if token would not exits, if above would have failed
-            string username = BL.Services.AuthService.getUserNameFromToken(token);
+            string username = BL.Services.AuthService.getUserNameFromToken(req.Headers["Authorization"]);
             List<Card> cards = new();
 
             try
@@ -63,7 +59,7 @@ namespace MonsterCardTradingGame.PL.Controller
          *  /packages, POST (only Admin)
          *  Create new Packages
          */
-        public static HttpResponse AddPackage(Server.HttpRequest req)
+        public static HttpResponse AddPackage(HttpRequest req)
         {
             HttpResponse res;
             

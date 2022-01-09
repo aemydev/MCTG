@@ -122,9 +122,39 @@ namespace MonsterCardTradingGame.BL.Services
          */
         public static Deck GetActiveDeck(Guid deck_id)
         {
+            
+            
+            
             try
             {
                 return deckrepos.GetDeckById(deck_id);
+            }
+            catch
+            {
+                throw; // Something went wrong
+            }
+        }
+
+        public static Deck GetActiveDeck(string username)
+        {
+            User user;
+            try
+            {
+                user = userrepos.GetByName(username);
+            }
+            catch
+            {
+                throw;
+            }
+
+            if(user.ActiveDeckId.ToString() == "")
+            {
+                throw new HttpException("no deck set");
+            }
+
+            try
+            {
+                return deckrepos.GetDeckById((Guid)user.ActiveDeckId);
             }
             catch
             {

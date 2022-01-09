@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MonsterCardTradingGame.Exceptions;
+using MonsterCardTradingGame.Model;
 
 namespace MonsterCardTradingGame.BL.Services
 {
@@ -17,7 +18,7 @@ namespace MonsterCardTradingGame.BL.Services
         /*
          *  Add new Card to DB
          */
-        public static bool AddPackage(List<Model.Card> cards)
+        public static bool AddPackage(List<Card> cards)
         {
             try
             {

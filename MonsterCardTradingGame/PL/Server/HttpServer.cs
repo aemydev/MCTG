@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,8 +15,9 @@ namespace MonsterCardTradingGame.Server
         protected int port; // Default: 8080
         private IPAddress ip; // Default: IPAddress.Loopback
         public string serverName = "MonsterCardTradingGameServer";
-        public Server.Router.Router router = new Server.Router.Router(); 
-
+        public Server.Router.Router router = new Server.Router.Router();
+        public ConcurrentQueue<Model.Battle> games = new();
+        
         private TcpListener listener;
 
         public HttpServer(int port, string ip = "")

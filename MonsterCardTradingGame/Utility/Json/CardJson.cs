@@ -10,8 +10,9 @@ namespace MonsterCardTradingGame.Utility.Json
     {
         public string Name { get; set; }
         public int Damage { get; set; }
-        public Model.ElementTypes Type { get; set; }
+        public Model.CardTypes Type { get; set; }
         public Model.ElementTypes ElementType { get; set; }
         public string Description { get; set; }
+       // public Model.MonsterType MonsterType { get; set; }
     }
 }

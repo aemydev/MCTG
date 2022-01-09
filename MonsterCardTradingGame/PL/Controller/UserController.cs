@@ -17,7 +17,7 @@ namespace MonsterCardTradingGame.PL.Controller
         /*
          *  /register, POST
          */
-        public static HttpResponse Register(Server.HttpRequest req)
+        public static HttpResponse Register(HttpRequest req)
         {
             HttpResponse res;
 
@@ -47,7 +47,7 @@ namespace MonsterCardTradingGame.PL.Controller
         /*
         *  /login, POST
         */
-        public static HttpResponse Login(Server.HttpRequest req)
+        public static HttpResponse Login(HttpRequest req)
         {
             HttpResponse res;
 
@@ -83,10 +83,11 @@ namespace MonsterCardTradingGame.PL.Controller
 
         #endregion
         #region deck
+
         /*
         *  /deck, GET
         */
-        public static HttpResponse ShowActiveDeck(Server.HttpRequest req)
+        public static HttpResponse ShowActiveDeck(HttpRequest req)
         {
             HttpResponse res;
 
@@ -99,8 +100,7 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-            string token = req.Headers["Authorization"]; // no if required, we already checked that token is valid
-            string username = BL.Services.AuthService.getUserNameFromToken(token);
+            string username = BL.Services.AuthService.getUserNameFromToken(req.Headers["Authorization"]);
             Model.User user;
             
             Console.WriteLine($"[{DateTime.UtcNow}]\tShow active deck \"username\"");

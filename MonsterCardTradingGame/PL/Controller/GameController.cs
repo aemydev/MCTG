@@ -78,7 +78,20 @@ namespace MonsterCardTradingGame.PL.Controller
             try
             {
                 winner = game.JoinBattle(username);
-            }catch(System.Exception e)
+            }
+            catch (GameException e) when (e.Message == "no deck set")
+            {
+                res = new HttpResponse(HttpStatusCode.NotFound);
+                res.AddContent("application/json", "{\"message\":\"Something went wrong. Please try again.\"}");
+                return res;
+            }
+            catch (GameException e) when (e.Message == "no game found")
+            {
+                res = new HttpResponse(HttpStatusCode.NotFound);
+                res.AddContent("application/json", "{\"message\":\"Currently are not battles availiable.\"}");
+                return res;
+            }
+            catch (System.Exception e)
             {
                 Console.WriteLine(e.Message);
                 res = new HttpResponse(HttpStatusCode.InternalServerError);

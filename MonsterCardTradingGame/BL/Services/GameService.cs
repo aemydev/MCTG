@@ -47,6 +47,7 @@ namespace MonsterCardTradingGame.BL.Services
 
             // Subscribe to event
             battleReq.OnAccepted += StartBattle_BattleReq_OnAccepted;
+            
             while (!accepted)
             {
                 Thread.Sleep(500);

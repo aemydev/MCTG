@@ -7,22 +7,23 @@ using MonsterCardTradingGame.Exceptions;
 using MonsterCardTradingGame.Model;
 
 namespace MonsterCardTradingGame.BL.Services
-{
-    /*
-     *  
-     */
+{ 
     class CardService
     {
-        static DAL.Repository.ICardRepository Cardrepos = new DAL.Repository.CardRepository();
+        public static DAL.Repository.ICardRepository cardrepos = new DAL.Repository.CardRepository();
+
+        
 
         /*
-         *  Add new Card to DB
-         */
+        *  Add new Card to DB
+        */
         public static bool AddPackage(List<Card> cards)
         {
+            // Auth user
+
             try
             {
-                Cardrepos.CreateMultiple(cards);
+                cardrepos.CreateMultiple(cards);
             }
             catch
             {
@@ -42,7 +43,7 @@ namespace MonsterCardTradingGame.BL.Services
 
             try
             {
-                cards = Cardrepos.GetAllByUser(user.UserId);
+                cards = cardrepos.GetAllByUser(user.UserId);
                 return cards;
             }
             catch
@@ -79,7 +80,7 @@ namespace MonsterCardTradingGame.BL.Services
 
             try
             {
-                return Cardrepos.GetPackage(user.UserId);
+                return cardrepos.GetPackage(user.UserId);
             }
             catch
             {

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Server
 {
@@ -17,6 +15,7 @@ namespace MonsterCardTradingGame.Server
         public Dictionary<string, string> Headers { get; set; }
         private Dictionary<HttpStatusCode, string> StatusCodeString;
 
+
         public HttpResponse(HttpStatusCode statusCode)
         {
             initStatusCodes(); 
@@ -26,7 +25,7 @@ namespace MonsterCardTradingGame.Server
             Headers = new();
         }  
 
-        void initStatusCodes()
+        private void initStatusCodes()
         {
             StatusCodeString = new();
             StatusCodeString.Add(HttpStatusCode.OK, "200");
@@ -38,42 +37,36 @@ namespace MonsterCardTradingGame.Server
             StatusCodeString.Add(HttpStatusCode.Unauthorized, "401");
         }
 
+        /*
+         *  Add Header
+         */
         public void addHeader(string key, string value)
         {
             Headers.Add(key, value);
         }
        
-        // Set Content-Type and Content of Response:
+        /*
+         * Set Content-Type and Content of Response:
+         */
         public void AddContent(string contentType, string content)
         {
             ContentType = contentType;
             Content = content;
         }
 
+        /*
+         *  Send Reponse
+         */
         public void Send(StreamWriter writer, string serverName)
         {
-            /* 
-            HTTP/Version Response-Code (Status)
-            Klartext-Meldung (Reason)
-            General Header
-            Response Header
-            Entity Header (optional)
-            Leerzeile (!)
-            Resource Entity (falls vorhanden)
-            */
-
             Console.WriteLine($"[{DateTime.UtcNow}]\tSend HTTP-Response, Statuscode: {StatusCode}");
 
             // If there is no content -> Content-Length = 0
             string responseContent = Content == null ? "0" : Content;
 
-            // HTTP/Version Response-Code (Status)
-            WriteLine(writer, $"HTTP/{Version} {StatusCode}"); // !!
-
-            // Klartext - Meldung(Reason)
+            WriteLine(writer, $"HTTP/{Version} {StatusCode}"); 
             WriteLine(writer, $"Current Time: {DateTime.Now}");
 
-            // General Header
             if (Headers.Count() > 0)
             {
                 foreach (KeyValuePair<string, string> header_ in Headers)
@@ -82,17 +75,11 @@ namespace MonsterCardTradingGame.Server
                 }
             }
 
-            // Response Header -> Header mit weiteren Informationen zur
-            // Antwort, wie etwa ihres Orts oder den Server selbst (Name und Version etc.)
-            WriteLine(writer, $"Server: {serverName}"); // !!
-
-            // Entity Header(optional) -> Infos about Body, if it exists
+            WriteLine(writer, $"Server: {serverName}"); 
             WriteLine(writer, $"Content-Length: {responseContent.Length}");
             WriteLine(writer, $"Content-Type: {ContentType}");
-
             // Leerzeile(!)
             WriteLine(writer, ""); 
-
             WriteLine(writer, responseContent); // only if set
             
             writer.WriteLine();

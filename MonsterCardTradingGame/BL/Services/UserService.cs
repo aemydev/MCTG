@@ -14,8 +14,8 @@ namespace MonsterCardTradingGame.BL.Services
 {
     class UserService
     {
-        static DAL.Repository.IUserRepository userrepos = new DAL.Respository.UserRepository();
-        static DAL.Repository.IDeckRepository deckrepos = new DAL.Repository.DeckRepository();
+        public static DAL.Repository.IUserRepository userrepos = new DAL.Repository.UserRepository();
+        public static DAL.Repository.IDeckRepository deckrepos = new DAL.Repository.DeckRepository();
 
         /*
          *  Register a new User
@@ -220,6 +220,7 @@ namespace MonsterCardTradingGame.BL.Services
         
         #endregion
         #region helper
+        
         /*
          *  Helper
          */

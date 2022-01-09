@@ -14,6 +14,7 @@ namespace MonsterCardTradingGame.DAL.Repository
         Postgres.PostgresAccess db = Postgres.PostgresAccess.Instance;
         private const string TABLE_NAME = "card";
 
+
         /*
          *  Create
          */

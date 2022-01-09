@@ -92,7 +92,7 @@ namespace MonsterCardTradingGame.PL.Controller
             HttpResponse res;
 
             // Valid token?
-            if (!BL.Services.AuthService.Auth(req))
+            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 // no -> send error response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
@@ -100,8 +100,7 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-            string username = BL.Services.AuthService.getUserNameFromToken(req.Headers["Authorization"]);
-            Model.User user;
+            Model.User user;  
             
             Console.WriteLine($"[{DateTime.UtcNow}]\tShow active deck \"username\"");
 
@@ -161,32 +160,11 @@ namespace MonsterCardTradingGame.PL.Controller
             HttpResponse res;
 
             // Valid token?
-            if (!BL.Services.AuthService.Auth(req))
+            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 // no -> send error response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
                 res.AddContent("application/json", "{\"message\":\"Access denied. Please Login.\"}");
-                return res;
-            }
-
-            string token = req.Headers["Authorization"]; // no if required, we already checked that token is valid
-            string username = BL.Services.AuthService.getUserNameFromToken(token);
-            Guid userid;
-            // Get user
-            try
-            {
-                userid = BL.Services.UserService.GetIdByUsername(username);
-            }
-            catch (HttpException e) when (e.Message == "404 not found")
-            {
-                res = new HttpResponse(HttpStatusCode.InternalServerError);
-                res.AddContent("application/json", "{\"message\":\"User not found\"}");
-                return res;
-            }
-            catch
-            {
-                res = new HttpResponse(HttpStatusCode.InternalServerError);
-                res.AddContent("application/json", "{\"message\":\"Something went wrong\"}");
                 return res;
             }
 
@@ -220,7 +198,7 @@ namespace MonsterCardTradingGame.PL.Controller
             HttpResponse res;
 
             // Valid token?
-            if (!BL.Services.AuthService.Auth(req))
+            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 // no -> send error response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
@@ -228,11 +206,7 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-            string token = req.Headers["Authorization"]; // no if required, we already checked that token is valid
-            string username = BL.Services.AuthService.getUserNameFromToken(token);
             Model.User user;
-
-            // Get user
             try
             {
                 user = BL.Services.UserService.GetUserByUsername(username);
@@ -275,7 +249,7 @@ namespace MonsterCardTradingGame.PL.Controller
             HttpResponse res;
 
             // Valid token?
-            if (!BL.Services.AuthService.Auth(req))
+            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 // no -> send error response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
@@ -283,24 +257,7 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-            string token = req.Headers["Authorization"];
-            string username = BL.Services.AuthService.getUserNameFromToken(token);
-            Guid userid;
-            // Get user, if active_deck == null
-            try
-            {
-                userid = BL.Services.UserService.GetIdByUsername(username);
-            }
-            catch
-            {
-                res = new HttpResponse(HttpStatusCode.InternalServerError);
-                res.AddContent("application/json", "{\"message\":\"Something went wrong\"}");
-                return res;
-            }
-
-
             var deckJson = JsonConvert.DeserializeObject<Utility.Json.DeckJson>(req.Content);
-            Console.WriteLine(deckJson.Id);
 
             // Add Deck
             try
@@ -318,8 +275,6 @@ namespace MonsterCardTradingGame.PL.Controller
             res.AddContent("application/json", "{\"message\":\"Active Deck has been set.\"}");
             return res;
         }
-
-
 
         #endregion
         #region userprofile

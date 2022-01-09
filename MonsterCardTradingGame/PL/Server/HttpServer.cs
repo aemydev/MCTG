@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Server
 {
-    class HttpServer
+    public class HttpServer
     {
         protected int port; // Default: 8080
         private IPAddress ip; // Default: IPAddress.Loopback

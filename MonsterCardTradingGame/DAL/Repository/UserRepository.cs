@@ -9,7 +9,7 @@ using Npgsql;
 using System.Data;
 using MonsterCardTradingGame.Exceptions;
 
-namespace MonsterCardTradingGame.DAL.Respository
+namespace MonsterCardTradingGame.DAL.Repository
 {
     class UserRepository : IUserRepository
     {

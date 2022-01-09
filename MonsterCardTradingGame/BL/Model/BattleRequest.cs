@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace MonsterCardTradingGame.Model
 {
     public enum RequestState {Pending, Accepted };
+    
     class BattleRequest
     {
         public User Player1 { get; init; }
@@ -21,9 +22,6 @@ namespace MonsterCardTradingGame.Model
             public Guid battleId;
         }
 
-        /*
-         *  Constructor
-         */
         public BattleRequest(User player1)
         {
             Player1 = player1;

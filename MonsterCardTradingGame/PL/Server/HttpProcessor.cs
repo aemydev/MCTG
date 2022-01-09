@@ -34,9 +34,7 @@ namespace MonsterCardTradingGame.Server
 
             Console.WriteLine($"[{DateTime.UtcNow}]\tClient connected.");
 
-            /*
-             *  Parse the Request
-             */
+            // Parse the Request
             HttpRequest httpRequest = ParseHeader(reader);
 
             // For POST only: Parse Content
@@ -57,7 +55,7 @@ namespace MonsterCardTradingGame.Server
             }
 
             /*
-             *  Endpoints, Regex?
+             *  Endpoints
              */
             HttpResponse res;
 

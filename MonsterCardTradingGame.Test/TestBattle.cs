@@ -15,23 +15,60 @@ namespace MonsterCardTradingGame.Test
         {
             player1 = new User(Guid.NewGuid(), "player1", "password");
             player2 = new User(Guid.NewGuid(), "player2", "password");    
-            battle = new Battle(Guid.NewGuid(), player1, player2);
 
             deck1 = new(Guid.NewGuid(), player1.UserId, "TestDeck1");
             deck2 = new(Guid.NewGuid(), player2.UserId, "TestDeck2");
+
+            battle = new(Guid.NewGuid(), player1, player2);
         }
 
+        #region testElo
 
         [Test]
-        public void testEvaluateCards_GoblinAginstDragon_WinnerIsDragon1()
+        public void testCalcElo_Loser()
         {
+            // Act
+            int val = battle.CallCalculateElo(WinLose.Loser);
+
+            // Assert
+            Assert.AreEqual(-5, val);
+        }
+
+        [Test]
+        public void testCalcElo_Winner()
+        {
+            // Act 
+            int val = battle.CallCalculateElo(WinLose.Winner);
+
+            // Assert
+            Assert.AreEqual(3, val);
+        }
+
+        [Test]
+        public void testCalcElo_Draw()
+        {
+            // Act 
+            int val = battle.CallCalculateElo(WinLose.Draw);
+
+            // Assert
+            Assert.AreEqual(1, val);
+        }
+
+        #endregion
+
+        [Test]
+        public void testEvaluateCards_GoblinAginstDragon_WinnerIsHigherValue()
+        {
+            // Arrange
             Card dragon_winner = new Card(Guid.NewGuid(), "Dragon", "", 10, CardTypes.Monster, ElementTypes.Normal);
             Card dragon = new Card(Guid.NewGuid(), "Dragon", "", 5, CardTypes.Monster, ElementTypes.Fire);
 
+            // Act
             Guid winnerCard = battle.CallEvaluateCards(dragon, dragon_winner);
-            Assert.AreEqual(dragon_winner.CardID, winnerCard);
-
             Guid winnerCard2 = battle.CallEvaluateCards(dragon_winner, dragon);
+
+            // Assert
+            Assert.AreEqual(dragon_winner.CardID, winnerCard);
             Assert.AreEqual(dragon_winner.CardID, winnerCard2);
         }
 
@@ -39,14 +76,15 @@ namespace MonsterCardTradingGame.Test
         [Test]
         public void testEvaluateCards_WaterAgainstFire_WinnerIsWater()
         {
+            // Arrange
             Card waterspell_winner = new Card(Guid.NewGuid(), "WaterSpell", "", 5, CardTypes.Spell, ElementTypes.Water);
             Card firespell = new Card(Guid.NewGuid(), "FireSpell", "", 5, CardTypes.Spell, ElementTypes.Fire);
 
+            // Act
             Guid winnerCard = battle.CallEvaluateCards(waterspell_winner, firespell);
-            Assert.AreEqual(waterspell_winner.CardID, winnerCard);
 
-            Guid winnerCard2 = battle.CallEvaluateCards(firespell, waterspell_winner);
-            Assert.AreEqual(waterspell_winner.CardID, winnerCard2);
+            // Assert
+            Assert.AreEqual(waterspell_winner.CardID, winnerCard);
         }
 
         [Test]
@@ -74,11 +112,6 @@ namespace MonsterCardTradingGame.Test
             Guid winnerCard2 = battle.CallEvaluateCards(waterspell, normalspell_winner);
             Assert.AreEqual(normalspell_winner.CardID, winnerCard2);
         }
-
-        // Test ineffective
-       
-        // effective
-
 
         #endregion
         #region testMonsterCards

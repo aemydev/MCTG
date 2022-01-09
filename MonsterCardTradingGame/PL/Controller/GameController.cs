@@ -21,7 +21,7 @@ namespace MonsterCardTradingGame.PL.Controller
             String winner;
 
             // Valid token?
-            if (!BL.Services.AuthService.AuthToken(req, out string username, out Guid userid))
+            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 res = new HttpResponse(HttpStatusCode.Forbidden);
                 res.AddContent("application/json", "{\"message\":\"Access denied. Invalid token.\"}");
@@ -54,24 +54,26 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-
-
             res = new HttpResponse(HttpStatusCode.OK);
             res.AddContent("application/json", $"{{\"message\":\"Battle Ended. {winner} won the Battle\"}}");
             return res;
         }
 
+        /*
+         * /battle/join, POST
+         */
         public static HttpResponse JoinBattle(HttpRequest req)
         {
             HttpResponse res;
 
             // Valid token?
-            if (!BL.Services.AuthService.AuthToken(req, out string username, out Guid userid))
+            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 res = new HttpResponse(HttpStatusCode.Forbidden);
                 res.AddContent("application/json", "{\"message\":\"Access denied. Invalid token.\"}");
                 return res;
             }
+
             string winner;
             BL.Services.GameService game = new();
 

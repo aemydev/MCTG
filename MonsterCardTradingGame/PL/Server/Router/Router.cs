@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Server.Router
 {
-    class Router
+    public class Router
     {
-        public delegate Server.HttpResponse Endpoint(Server.HttpRequest req);
+        public delegate HttpResponse Endpoint(Server.HttpRequest req);
         public Dictionary<string, Endpoint> PostRoutes { get; set; } = new();
         public Dictionary<string, Endpoint> GetRoutes { get; set; } = new();
         public Dictionary<string, Endpoint> PutRoutes { get; set; } = new();

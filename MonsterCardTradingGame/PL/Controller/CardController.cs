@@ -19,7 +19,7 @@ namespace MonsterCardTradingGame.PL.Controller
             HttpResponse res;
             
             // Valid token?
-            if (!BL.Services.AuthService.Auth(req))
+            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 // no -> send error response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
@@ -27,7 +27,6 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-            string username = BL.Services.AuthService.getUserNameFromToken(req.Headers["Authorization"]);
             List<Card> cards = new();
 
             try
@@ -107,17 +106,13 @@ namespace MonsterCardTradingGame.PL.Controller
             HttpResponse res;
             IEnumerable<Card> cards;
 
-            if (!BL.Services.AuthService.Auth(req))
+            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 res = new HttpResponse(HttpStatusCode.Forbidden);
                 res.AddContent("application/json", "{\"message\":\"Access denied.\"}");
                 return res;
             }
 
-            // Get Username from Token
-            string username = BL.Services.AuthService.getUserNameFromToken(req.Headers["Authorization"]);
-
-            // Error Handlingtry{try
             try{
                cards =  BL.Services.CardService.AquirePackage(username);
             }
@@ -127,7 +122,6 @@ namespace MonsterCardTradingGame.PL.Controller
                 res.AddContent("application/json", "{\"message\":\"Something went wrong.\"}");
                 return res;
             }
-
 
             string jsonString = JsonConvert.SerializeObject(cards);    
             res = new HttpResponse(HttpStatusCode.OK);
@@ -154,5 +148,4 @@ namespace MonsterCardTradingGame.PL.Controller
             throw new NotImplementedException();
         }
     }
-
 }

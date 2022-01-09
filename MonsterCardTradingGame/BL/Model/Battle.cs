@@ -10,6 +10,7 @@ namespace MonsterCardTradingGame.Model
     public enum BattleStates { Running, Done }
     public enum Player { player1, player2, draw }
     // Producer
+    public enum WinLose { Winner, Loser, Draw}
 
     public class Battle
     {
@@ -18,8 +19,7 @@ namespace MonsterCardTradingGame.Model
         public User Player1 { get; private set; }
         public User Player2 { get; private set; }
         public string Winner { get; private set; }
-
-        // Private
+        public List<String> Log { get; private set; }
         private const int MAX_ROUNDS = 100;
 
         // Events:
@@ -28,9 +28,8 @@ namespace MonsterCardTradingGame.Model
         {
             public string winner;
             public Guid battleid;
+            public bool scoreboardentry = false;
         }
-
-        //AutoResetEvent, ManualResetEvent, WaitHandler 
 
         /*
          *  Constructor
@@ -53,16 +52,45 @@ namespace MonsterCardTradingGame.Model
             // Get the active decks
             Deck gameDeck1 = BL.Services.UserService.GetActiveDeck((Guid)Player1.ActiveDeckId);
             Deck gameDeck2 = BL.Services.UserService.GetActiveDeck((Guid)Player2.ActiveDeckId);
-
+         
             // Game-Loop
             Winner = GameLoop(gameDeck1, gameDeck2);
             Console.WriteLine($"[{DateTime.UtcNow}]\tBatte ended. The winner is {Winner}!");
 
             // Transfer the Cards from loser -> winner, Persist in DB
+            // add cards from losing player to stack of other player?
 
+            // Calc Stats
+            int eloPlayer1 = 0, eloPlayer2 = 0;
 
+            if (Winner == Player1.Username)
+            {
+                eloPlayer1 = CalcElo(WinLose.Winner);
+                eloPlayer2 = CalcElo(WinLose.Loser);
+            }
+            else if(Winner == Player2.Username)
+            {
+                eloPlayer1 = CalcElo(WinLose.Loser);
+                eloPlayer2 = CalcElo(WinLose.Winner);
+            }
+            else
+            {
+                eloPlayer1 = CalcElo(WinLose.Draw);
+                eloPlayer2 = CalcElo(WinLose.Draw);
+            }
 
-            OnBattleEnd?.Invoke(this, new OnBattleEndArgs { winner = Winner, battleid = Id });
+            bool scoreboardEntry_ = true;
+            try
+            {
+                BL.Services.ScoreboardService.AddEntry(new ScoreboardEntry(Player1.UserId, eloPlayer1));
+                BL.Services.ScoreboardService.AddEntry(new ScoreboardEntry(Player2.UserId, eloPlayer2));
+            }catch(System.Exception e)
+            {
+                Console.WriteLine(e.Message);
+                scoreboardEntry_ = false;
+            }
+           
+            OnBattleEnd?.Invoke(this, new OnBattleEndArgs { winner = Winner, battleid = Id, scoreboardentry = scoreboardEntry_ });
         }
 
         /*
@@ -316,12 +344,33 @@ namespace MonsterCardTradingGame.Model
 
         }
         
+        private int CalcElo(WinLose winOrLose)
+        {
+            if(winOrLose == WinLose.Winner)
+            {
+                return 3;
+            }
+            else if(winOrLose == WinLose.Loser)
+            {
+                return -5;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
         /*
          *  For Testing:
          */
         public Guid CallEvaluateCards(Card p1card, Card p2card)
         {
             return EvaluateCards(p1card, p2card);
+        }
+        
+        public int CallCalculateElo(WinLose winLose)
+        {
+            return CalcElo(winLose);
         }
     }
 }

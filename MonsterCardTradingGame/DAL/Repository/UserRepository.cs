@@ -147,12 +147,12 @@ namespace MonsterCardTradingGame.DAL.Repository
             catch (System.Exception e) when (e.Message == "No row is available")
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tUser \"{username}\" does not exist.");
-                throw new RepositoryException("User does not exist");
+                throw new RepositoryException("user not found");
             }
             catch (System.Exception e)
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tCould not get \"{username}\", {e.Message}");
-                throw new RepositoryException("Error");
+                throw new RepositoryException("db error");
             }
         }
         

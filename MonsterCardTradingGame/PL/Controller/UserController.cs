@@ -8,11 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using MonsterCardTradingGame.Exceptions;
 using MonsterCardTradingGame.Model;
+using MonsterCardTradingGame.BL.Services;
 
 namespace MonsterCardTradingGame.PL.Controller
 {
     public static class UserController
     {
+        private static UserService UserService = new UserService();
+
         #region userbasics
         /*
          *  /register, POST
@@ -26,13 +29,15 @@ namespace MonsterCardTradingGame.PL.Controller
 
             try
             {
-                BL.Services.UserService.Register(cred);
-            }catch(HttpException e) when (e.Message == "409 Conflict")
+                UserService.Register(cred);
+            
+            }catch(ServiceException e) when (e.Message == "user already exists")
             {
                 res = new HttpResponse(HttpStatusCode.Conflict);
                 res.AddContent("application/json", "{\"response\":\"User already exists.\"}");
                 return res;
-            }catch(HttpException e) when(e.Message == "500 Interal Server Error")
+
+            }catch(ServiceException e) when (e.Message == "db error")
             {
                 res = new HttpResponse(HttpStatusCode.InternalServerError);
                 res.AddContent("application/json", "{\"response\":\"Internal Server Error.\"}");
@@ -55,19 +60,21 @@ namespace MonsterCardTradingGame.PL.Controller
             string token;
             try
             {
-                token = BL.Services.UserService.Login(cred);
+                token = UserService.Login(cred);
             }
-            catch (HttpException e) when (e.Message == "404 Not Found")
+            catch (ServiceException e) when (e.Message == "not found")
             {
                 res = new HttpResponse(HttpStatusCode.NotFound);
                 res.AddContent("application/json", "{\"message\":\"User not found.\"}");
                 return res;
-            }catch(HttpException e) when(e.Message =="500 Internal Server Error")
+
+            }catch(ServiceException e) when(e.Message =="db error")
             {
                 res = new HttpResponse(HttpStatusCode.InternalServerError);
                 res.AddContent("application/json", "{\"message\":\"Something went wrong.\"}");
                 return res;
-            }catch(HttpException e) when (e.Message == "401 Unauthorized")
+
+            }catch(ServiceException e) when (e.Message == "login failed")
             {
                 res = new HttpResponse(HttpStatusCode.Unauthorized);
                 res.AddContent("application/json", "{\"message\":\"Password incorrect.\"}");
@@ -99,29 +106,17 @@ namespace MonsterCardTradingGame.PL.Controller
                 res.AddContent("application/json", "{\"message\":\"Access denied. Please Login.\"}");
                 return res;
             }
-
-            Model.User user;  
-            
+    
             Console.WriteLine($"[{DateTime.UtcNow}]\tShow active deck \"username\"");
 
             // Get user
-            try
+            if (!UserService.GetUserByUsername(username, out User user))
             {
-                user = BL.Services.UserService.GetUserByUsername(username);
-            }
-            catch(HttpException e) when (e.Message == "404 not found")
-            {
-                res = new HttpResponse(HttpStatusCode.InternalServerError);
+                res = new HttpResponse(HttpStatusCode.NotFound);
                 res.AddContent("application/json", "{\"message\":\"User not found\"}");
                 return res;
             }
-            catch
-            {
-                res = new HttpResponse(HttpStatusCode.InternalServerError);
-                res.AddContent("application/json", "{\"message\":\"Something went wrong\"}");
-                return res;
-            }
-            
+              
             // if active_deck == null
             if (user.ActiveDeckId == null)
             {
@@ -132,13 +127,7 @@ namespace MonsterCardTradingGame.PL.Controller
             }
 
             // otherwise get deck with deck_id and send it inkl titel etc.
-            Deck deck;
-            try
-            {
-                Console.WriteLine(user.ActiveDeckId);
-                deck = BL.Services.UserService.GetActiveDeck((Guid)user.ActiveDeckId);
-            }
-            catch
+            if (!UserService.GetActiveDeck((Guid)user.ActiveDeckId, out Deck deck))
             {
                 res = new HttpResponse(HttpStatusCode.InternalServerError);
                 res.AddContent("application/json", "{\"response\":\"Something went wrong\"}");
@@ -172,7 +161,7 @@ namespace MonsterCardTradingGame.PL.Controller
             List<Deck> decks;
             try
             {
-                decks = BL.Services.UserService.GetAllDecks(userid);
+                decks = UserService.GetAllDecks(userid);
             }
             catch
             {
@@ -206,28 +195,17 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-            Model.User user;
-            try
-            {
-                user = BL.Services.UserService.GetUserByUsername(username);
-            }
-            catch (HttpException e) when (e.Message == "404 not found")
+            if (!UserService.GetUserByUsername(username, out User user))
             {
                 res = new HttpResponse(HttpStatusCode.InternalServerError);
                 res.AddContent("application/json", "{\"message\":\"User not found\"}");
                 return res;
             }
-            catch
-            {
-                res = new HttpResponse(HttpStatusCode.InternalServerError);
-                res.AddContent("application/json", "{\"message\":\"Something went wrong\"}");
-                return res;
-            }
-
+              
             var deckJson = JsonConvert.DeserializeObject<Utility.Json.DeckJson>(req.Content);
             try
             {
-                BL.Services.UserService.AddNewDeck(deckJson,user.UserId);
+                UserService.AddNewDeck(deckJson, user.UserId);
             }
             catch
             {
@@ -262,7 +240,7 @@ namespace MonsterCardTradingGame.PL.Controller
             // Add Deck
             try
             {
-                BL.Services.UserService.SetActiveDeck(userid, Guid.Parse(deckJson.Id));
+                UserService.SetActiveDeck(userid, Guid.Parse(deckJson.Id));
             }
             catch
             {

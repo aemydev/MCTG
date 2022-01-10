@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Utility.Json
 {
-    class CredentialsJson
+    public class CredentialsJson
     {
         public string Username { get; set; }
         public string Password { get; set; }

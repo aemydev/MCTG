@@ -7,6 +7,8 @@ namespace MonsterCardTradingGame.BL.Services
 {
     class GameService
     {
+        private static UserService UserService = new UserService();
+
         private static bool gameEnded;
         private static bool accepted;
         private static string Winner;
@@ -23,16 +25,11 @@ namespace MonsterCardTradingGame.BL.Services
             Console.WriteLine($"[{DateTime.UtcNow}\t StartBattle({username})");
 
             // Active deck set for user?
-            User user;
-            try
+            if(!UserService.GetUserByUsername(username, out User user))
             {
-                user = UserService.GetUserByUsername(username);
+                throw new ServiceException("user not found");
             }
-            catch
-            {
-                throw;
-            }
-
+            
             if (user.ActiveDeckId.ToString() == "")
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tError: No active deck set for \"{username}\"");
@@ -90,25 +87,17 @@ namespace MonsterCardTradingGame.BL.Services
             Console.WriteLine($"[{DateTime.UtcNow}\t JoinBattle({username})");
             
             // Active deck set for user?
-            User user;
-            try
-            {
-                user = UserService.GetUserByUsername(username);
+            if(!UserService.GetUserByUsername(username, out User user)){
+                throw new Exception("user not found");
             }
-            catch
-            {
-                throw;
-            }
-
+           
             if (user.ActiveDeckId.ToString() == "")
             {
                 throw new HttpException("deck not set");
             }
 
             // Check if there are open battle-requests (1min)
-            // Current Time
-            var startTime = DateTime.Now;
-            var endTime = DateTime.Now.AddMinutes(1);
+            DateTime endTime = DateTime.Now.AddMinutes(1);
             bool stopSearch = false;
             Guid battleId;
 

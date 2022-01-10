@@ -12,9 +12,10 @@ namespace MonsterCardTradingGame.BL.Services
     public class AuthService
     {
         private const string TOKEN_PATTERN = "(Basic ([A-Z]|[a-z])\\w+-mtcgToken)";
+        private static UserService UserService = new UserService();
 
         /*
-        * Validate Token 
+        *  Validate Token 
         */
         public static bool AuthToken(Dictionary<string, string> headers, out string username, out Guid userid)
         {
@@ -54,7 +55,6 @@ namespace MonsterCardTradingGame.BL.Services
             return false;
         }
 
-
         /*
         *  Check if token is "admin-Token"
         */
@@ -85,17 +85,12 @@ namespace MonsterCardTradingGame.BL.Services
 
         private static bool IsRegistered(string username, out Guid userid)
         {
-            try
+            if(UserService.GetIdByUsername(username, out userid))
             {
-                userid = UserService.GetIdByUsername(username);
-            }
-            catch
-            {
-                userid = Guid.Empty;
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
     }
 }

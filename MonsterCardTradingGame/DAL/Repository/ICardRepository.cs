@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.DAL.Repository
 {
-    interface ICardRepository
+    public interface ICardRepository
     {
         // Create
         //void Create(Card card);

@@ -5,86 +5,102 @@ using System.Text;
 using System.Threading.Tasks;
 using MonsterCardTradingGame.Exceptions;
 using MonsterCardTradingGame.Model;
+using MonsterCardTradingGame.DAL;
 
 namespace MonsterCardTradingGame.BL.Services
 { 
-    class CardService
+    public class CardService
     {
-        public static DAL.Repository.ICardRepository cardrepos = new DAL.Repository.CardRepository();
+        public static DAL.Repository.ICardRepository cardrepos;
+        private UserService UserService = new UserService();
 
-        
+        /*
+         *  Constructor, Seam for Unit-Tests -> we are able to plug in our mock repos
+         */
+        public CardService()
+        {
+            cardrepos = new DAL.Repository.CardRepository();
+        }
+
+        public CardService(DAL.Repository.ICardRepository repos)
+        {
+            cardrepos = repos;
+        }
 
         /*
         *  Add new Card to DB
         */
-        public static bool AddPackage(List<Card> cards)
+        public void AddPackage(List<Card> cards)
         {
-            // Auth user
+            // Validate the Cards to be added
+            if(cards.Count > 5)
+            {
+                throw new ServiceException("too many cards");
 
+            }
+            
+            if(cards.Count < 5)
+            {
+                throw new ServiceException("not enough cards");
+            }
+
+            // Try adding new Package to Database:
             try
             {
                 cardrepos.CreateMultiple(cards);
             }
             catch
             {
-                return false;
+                throw new ServiceException();
             }
-
-            return true;
         }
 
         /*
          *  Show all Cards
          */
-        public static List<Model.Card> ShowAllCards(string username)
+        public List<Card> ShowAllCards(Guid userid)
         {
-            Model.User user = BL.Services.UserService.GetUserByUsername(username);
-            List<Model.Card> cards = new();
+            List<Card> cards;
 
             try
             {
-                cards = cardrepos.GetAllByUser(user.UserId);
+                cards = cardrepos.GetAllByUser(userid);
                 return cards;
             }
             catch
             {
-                throw;
+                throw new ServiceException("db error");
             }
         }
 
         /*
          *  Get Package
          */
-        public static IEnumerable<Model.Card> AquirePackage(string username)
+        public IEnumerable<Model.Card> AquirePackage(string username)
         {
             Console.WriteLine($"[{DateTime.UtcNow}]\tAquire new Package for \"{username}\"");
 
-            // Get user
-            Model.User user;
-            try
+            // Try to get user from db:
+            if (!UserService.GetUserByUsername(username, out User user))
             {
-               user = UserService.GetUserByUsername(username);
+                throw new ServiceException("error getting user");
             }
-            catch
-            {
-                // Error Handling
-                throw new HttpException("404 Not found");
-            }
-
-            // Does user have enough coins to buy a package?
+            
+            // enough coins to buy package?
             if(user.Coins < 5)
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tError: user \"{username}\" has not enough money");
-                throw new HttpException("No Money"); // Not enough coins
+                throw new ServiceException("no money"); 
             }
-
+     
+            // get package
             try
             {
                 return cardrepos.GetPackage(user.UserId);
             }
             catch
             {
-                throw new HttpException("500 Internal Server Error");
+                throw new ServiceException("db error");
             }
         }
     }

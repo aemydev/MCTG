@@ -89,42 +89,6 @@ namespace MonsterCardTradingGame.DAL.Repository
         /*
          *  Read
          */
-        /* public IEnumerable<Card> GetAll()
-         {
-             string sql = $"SELECT * FROM {TABLE_NAME};";
-             try
-             {
-                 using (var command = db.GetConnection().CreateCommand())
-                 {
-                     command.CommandText = sql;
-                     using NpgsqlDataReader reader = command.ExecuteReader();
-
-                     string cardID, title, description;
-                     int damage;
-
-                     List<Card> cards = new();
-
-                     while (reader.Read())
-                     {
-                         cardID = reader.GetString(0);
-                         title = reader.GetString(1);
-                         description = reader.GetString(2);
-                         damage = reader.GetInt32(3);
-
-                         cards.Add(new Model.MonsterCard(Guid.Parse(cardID), title, description, damage));
-                     }
-
-                     return cards;
-                 }
-             }
-             catch (System.Exception e)
-             {
-                 Console.WriteLine(e.Message);
-                 throw; // Better Error Handeling
-             }
-         }
-        */
-
         public List<Card> GetAllByUser(Guid id)
         {
             string sql = $"SELECT card_id, title, description, damage, element_type, card_type  FROM {TABLE_NAME} WHERE owner=@owner;";

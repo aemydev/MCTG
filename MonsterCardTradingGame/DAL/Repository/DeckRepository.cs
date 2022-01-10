@@ -128,7 +128,7 @@ namespace MonsterCardTradingGame.DAL.Repository
             catch (System.Exception e)
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\t Error getting Deck, {e.Message}");
-                throw new RepositoryException("Error");
+                throw new RepositoryException("db error");
             }
 
             return deck;

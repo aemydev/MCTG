@@ -1,4 +1,5 @@
-﻿using MonsterCardTradingGame.Exceptions;
+﻿using MonsterCardTradingGame.BL.Services;
+using MonsterCardTradingGame.Exceptions;
 using MonsterCardTradingGame.Model;
 using System;
 using System.Collections.Concurrent;
@@ -14,6 +15,8 @@ namespace MonsterCardTradingGame.Model
 
     public class Battle
     {
+        private UserService UserService = new UserService();
+
         public Guid Id { get; set; }
         public BattleStates Status { get; set; }
         public User Player1 { get; private set; }
@@ -50,9 +53,12 @@ namespace MonsterCardTradingGame.Model
             Console.WriteLine($"[{DateTime.UtcNow}]\tStart new battle ({Id}): {Player1.Username} vs. {Player2.Username}");
 
             // Get the active decks
-            Deck gameDeck1 = BL.Services.UserService.GetActiveDeck((Guid)Player1.ActiveDeckId);
-            Deck gameDeck2 = BL.Services.UserService.GetActiveDeck((Guid)Player2.ActiveDeckId);
-         
+            if ((!UserService.GetActiveDeck((Guid)Player1.ActiveDeckId, out Deck gameDeck1) ||
+                (!UserService.GetActiveDeck((Guid)Player2.ActiveDeckId, out Deck gameDeck2))))
+            {
+                throw new GameException("could not get deck");
+            }
+
             // Game-Loop
             Winner = GameLoop(gameDeck1, gameDeck2);
             Console.WriteLine($"[{DateTime.UtcNow}]\tBatte ended. The winner is {Winner}!");

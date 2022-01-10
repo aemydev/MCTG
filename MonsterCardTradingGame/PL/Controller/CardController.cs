@@ -8,8 +8,10 @@ using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.PL.Controller
 {
-    class CardController
+    public class CardController
     {
+        public static BL.Services.CardService cardService = new BL.Services.CardService();
+        
         /*
          *  /cards, GET
          *  Show all Cards for User
@@ -31,7 +33,7 @@ namespace MonsterCardTradingGame.PL.Controller
 
             try
             {
-                cards = BL.Services.CardService.ShowAllCards(username);
+                cards = cardService.ShowAllCards(userid);
             }
             catch(HttpException e) when (e.Message == "no cards")
             {
@@ -79,22 +81,35 @@ namespace MonsterCardTradingGame.PL.Controller
             // CardJson -> Json
             foreach(Utility.Json.CardJson jsoncard in package)
             {       
-               cards.Add(new Model.Card(Guid.NewGuid(), jsoncard.Name, jsoncard.Description, jsoncard.Damage, (CardTypes)jsoncard.Type, (ElementTypes)jsoncard.ElementType));        
+               cards.Add(new Card(Guid.NewGuid(), jsoncard.Name, jsoncard.Description, jsoncard.Damage, (CardTypes)jsoncard.Type, (ElementTypes)jsoncard.ElementType));        
             }
 
-            if (BL.Services.CardService.AddPackage(cards))
+            try
             {
-                // if everything worked -> return success message
+                cardService.AddPackage(cards);
+                
+            }catch (ServiceException e) when (e.Message == "too many cards")
+            {
+                res = new HttpResponse(HttpStatusCode.BadRequest);
+                res.AddContent("application/json", "{\"message\":\"Too many cards. New Packages must contain 5 Cards.\"}");
+                return res;
+
+            }catch(ServiceException e) when (e.Message == "not enough cards")
+            {
                 res = new HttpResponse(HttpStatusCode.Created);
                 res.AddContent("application/json", "{\"message\":\"Package successfully created.\"}");
                 return res;
             }
-            else
-            {  
+            catch
+            {
                 res = new HttpResponse(HttpStatusCode.InternalServerError);
-                res.AddContent("application/json", "{\"message\":\"Error creating Package. Please try again.\"}");
+                res.AddContent("application/json", "{\"message\":\"Something went wrong.\"}");
                 return res;
             }
+
+            res = new HttpResponse(HttpStatusCode.Created);
+            res.AddContent("application/json", "{\"message\":\"Package successfully created.\"}");
+            return res;
         }
 
         /*
@@ -114,11 +129,22 @@ namespace MonsterCardTradingGame.PL.Controller
             }
 
             try{
-               cards =  BL.Services.CardService.AquirePackage(username);
+               cards = cardService.AquirePackage(username);
+            }
+            catch (ServiceException e) when (e.Message == "error getting user")
+            {
+                res = new HttpResponse(HttpStatusCode.NotFound);
+                res.AddContent("application/json", "{\"message\":\"Could not get user.\"}");
+                return res;
+            }catch(ServiceException e) when (e.Message == "no money")
+            {
+                res = new HttpResponse(HttpStatusCode.Conflict);
+                res.AddContent("application/json", "{\"message\":\"Not enough money\"}");
+                return res;
             }
             catch
             {
-                res = new HttpResponse(HttpStatusCode.Conflict);
+                res = new HttpResponse(HttpStatusCode.InternalServerError);
                 res.AddContent("application/json", "{\"message\":\"Something went wrong.\"}");
                 return res;
             }

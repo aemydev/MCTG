@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Server
 {
-    class HttpServer
+    public class HttpServer
     {
         protected int port; // Default: 8080
         private IPAddress ip; // Default: IPAddress.Loopback
         public string serverName = "MonsterCardTradingGameServer";
+        public Server.Router.Router router = new Server.Router.Router();
+        public ConcurrentQueue<Model.Battle> games = new();
 
         private TcpListener listener;
 
@@ -28,7 +27,7 @@ namespace MonsterCardTradingGame.Server
             listener = new TcpListener(IPAddress.Loopback, port);
             listener.Start(5); // Queue of 5
 
-            Console.WriteLine("Server running...");
+            Console.WriteLine($"[{DateTime.UtcNow}]\tServer started. Waiting for connections...");
 
             while (true)
             {
@@ -36,7 +35,7 @@ namespace MonsterCardTradingGame.Server
 
                 HttpProcessor processor = new HttpProcessor(sock, this);
 
-                new Thread(processor.Process).Start(); //Tasks?
+                new Thread(processor.Process).Start();
 
                 Thread.Sleep(1);
             }

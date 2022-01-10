@@ -1,10 +1,5 @@
 ﻿using Npgsql;
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.DAL.Postgres
 {
@@ -12,7 +7,7 @@ namespace MonsterCardTradingGame.DAL.Postgres
      *  Access to postgres DB via ADO.NET
      *  Singelton, Lazy initialization
      */
-    public sealed class PostgresAccess
+    public sealed class PostgresAccess : IDisposable
     {
         private static readonly Lazy<PostgresAccess> lazy = new Lazy<PostgresAccess>(() => new PostgresAccess());
         public static PostgresAccess Instance { get { return lazy.Value; } }
@@ -38,6 +33,12 @@ namespace MonsterCardTradingGame.DAL.Postgres
         public NpgsqlConnection GetConnection()
         {
             return _connection;
+        }
+
+
+        public void Dispose()
+        {
+            _connection.Close();
         }
     }
 }

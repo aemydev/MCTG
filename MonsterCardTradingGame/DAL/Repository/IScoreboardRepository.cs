@@ -1,22 +1,18 @@
-﻿using MonsterCardTradingGame.Exceptions;
-using MonsterCardTradingGame.Model;
-using Npgsql;
+﻿using MonsterCardTradingGame.Model;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.DAL.Repository
 {
     interface IScoreboardRepository
     {
 
-        public void Create(Model.ScoreboardEntry entry);
+        public void Create(ScoreboardEntry entry);
 
-
-        public void Update(Model.ScoreboardEntry entry);
+        public void Update(ScoreboardEntry entry);
 
         public ScoreboardEntry GetEntry(Guid userid);
-     }
+
+        public List<ScoreboardEntry> GetAll();
+    }
 }

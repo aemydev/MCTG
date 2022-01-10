@@ -50,5 +50,35 @@ namespace MonsterCardTradingGame.BL.Services
                 }
             }
         }
+
+        public static bool GetStats(Guid userid, out ScoreboardEntry userscore)
+        {
+            try
+            {
+                userscore = scorerepos.GetEntry(userid);
+                return true;
+            }
+            catch
+            {
+                userscore = null;
+                return false;
+            }            
+            
+        }
+
+        public static bool GetScoreboard(Guid userid, out List<ScoreboardEntry> scoreboard)
+        {
+            try
+            {
+                scoreboard = scorerepos.GetAll();
+                return true;
+            }
+            catch
+            {
+                scoreboard = null;
+                return false;
+            }
+
+        }
     }
 }

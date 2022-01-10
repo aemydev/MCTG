@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Threading;
 
 namespace MonsterCardTradingGame
 {
@@ -12,6 +13,7 @@ namespace MonsterCardTradingGame
 
         static void Main(string[] args)
         {
+                   
             Console.WriteLine("MMMMMMMM               MMMMMMMM         CCCCCCCCCCCCC TTTTTTTTTTTTTTTTTTTTTTT        GGGGGGGGGGGGG");
             Console.WriteLine("M:::::::M             M:::::::M      CCC::::::::::::C T:::::::::::::::::::::T     GGG::::::::::::G");
             Console.WriteLine("M::::::::M           M::::::::M    CC:::::::::::::::C T:::::::::::::::::::::T   GG:::::::::::::::G");
@@ -59,8 +61,13 @@ namespace MonsterCardTradingGame
 
             // Battle Requests Battles
             gameServer.router.GetRoutes.Add("/battle/new", PL.Controller.GameController.NewBattle);
+                       
+            gameServer.router.GetRoutes.Add("/score", PL.Controller.ScoreboardController.ShowScoreboard);
+            
+            gameServer.router.GetRoutes.Add("/stats", PL.Controller.ScoreboardController.ShowStats);
 
             gameServer.Run();
+
         }
     }
 }

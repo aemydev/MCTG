@@ -1,11 +1,8 @@
-﻿using MonsterCardTradingGame.Model;
+﻿using MonsterCardTradingGame.Exceptions;
+using MonsterCardTradingGame.Model;
 using Npgsql;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.DAL.Repository
 {
@@ -50,7 +47,7 @@ namespace MonsterCardTradingGame.DAL.Repository
         */
         public void CreateMultiple(List<Card> cards)
         {
-            Console.WriteLine($"[{DateTime.UtcNow}]\tCreate new Package");
+            //Console.WriteLine($"[{DateTime.UtcNow}]\tCreate new Package");
             try
             {
                 using (var transaction = db.GetConnection().BeginTransaction())
@@ -78,7 +75,7 @@ namespace MonsterCardTradingGame.DAL.Repository
                     transaction.Commit();
                 }
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\t Error creating new Package, {e.Message}");
                 throw new RepositoryException("Error");
@@ -91,11 +88,11 @@ namespace MonsterCardTradingGame.DAL.Repository
          */
         public List<Card> GetAllByUser(Guid id)
         {
-            string sql = $"SELECT card_id, title, description, damage, element_type, card_type  FROM {TABLE_NAME} WHERE owner=@owner;";
             try
             {
                 using (var command = db.GetConnection().CreateCommand())
                 {
+                    string sql = $"SELECT card_id, title, description, damage, element_type, card_type  FROM {TABLE_NAME} WHERE owner=@owner;";
                     command.CommandText = sql;
                     command.Parameters.AddWithValue("@owner", id.ToString());
 
@@ -122,9 +119,9 @@ namespace MonsterCardTradingGame.DAL.Repository
                     return cards;
                 }
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                //Console.WriteLine(e.Message);
                 throw; // Better Error Handeling
             }
         }
@@ -207,7 +204,7 @@ namespace MonsterCardTradingGame.DAL.Repository
                         }
                     }
 
-                    if(cards.Count != 5)
+                    if (cards.Count != 5)
                     {
                         transaction.Rollback("not enough cards");
                     }

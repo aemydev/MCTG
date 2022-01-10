@@ -35,6 +35,8 @@ namespace MonsterCardTradingGame.Server
             StatusCodeString.Add(HttpStatusCode.Forbidden, "403");
             StatusCodeString.Add(HttpStatusCode.InternalServerError, "500");
             StatusCodeString.Add(HttpStatusCode.Unauthorized, "401");
+            StatusCodeString.Add(HttpStatusCode.BadRequest, "400");
+
         }
 
         /*

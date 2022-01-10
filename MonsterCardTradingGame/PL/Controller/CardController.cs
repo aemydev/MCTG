@@ -63,7 +63,7 @@ namespace MonsterCardTradingGame.PL.Controller
         public static HttpResponse AddPackage(HttpRequest req)
         {
             HttpResponse res;
-            
+
             // Valid token? username == admin? -> only "admin" can create new packages
             if (!BL.Services.AuthService.AuthAdmin(req))
             {
@@ -75,13 +75,22 @@ namespace MonsterCardTradingGame.PL.Controller
 
             List<Card> cards = new();
 
+            List<Utility.Json.CardJson> package;
+            try { 
             // String -> Json (Content)
-            var package = JsonConvert.DeserializeObject<List<Utility.Json.CardJson>>(req.Content);
-
+             package = JsonConvert.DeserializeObject<List<Utility.Json.CardJson>>(req.Content);
+            }catch{
+                // could not parse body
+                res = new HttpResponse(HttpStatusCode.InternalServerError);
+                res.AddContent("application/json", "{\"message\":\"Coud not parse content\"}");
+                return res;
+            }
+            
             // CardJson -> Json
             foreach(Utility.Json.CardJson jsoncard in package)
-            {       
-               cards.Add(new Card(Guid.NewGuid(), jsoncard.Name, jsoncard.Description, jsoncard.Damage, (CardTypes)jsoncard.Type, (ElementTypes)jsoncard.ElementType));        
+            {
+                Guid cardid = jsoncard.Id != null ? Guid.Parse(jsoncard.Id) : Guid.NewGuid();
+                cards.Add(new Card(cardid, jsoncard.Name, jsoncard.Description, jsoncard.Damage, (CardTypes)jsoncard.Type, (ElementTypes)jsoncard.ElementType));        
             }
 
             try
@@ -155,25 +164,6 @@ namespace MonsterCardTradingGame.PL.Controller
             res = new HttpResponse(HttpStatusCode.OK);
             res.AddContent("application/json", $"{{\"message\":\"Package successfully aquired\",\"content\":{jsonString}}}");
             return res;
-        }
-
-        /*
-         *  /tradings, GET
-         *  Show Trade-Deals
-         */
-        public static HttpResponse ShowTradeDeals(Server.HttpRequest req)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        /*
-         *  /tradings/card_id, POST
-         *  Trade Cards
-         */
-        public static HttpResponse TradeCards(Server.HttpRequest req)
-        {
-            throw new NotImplementedException();
         }
     }
 }

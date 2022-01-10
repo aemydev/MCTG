@@ -1,19 +1,13 @@
-﻿using MonsterCardTradingGame.DAL.Repository;
+﻿using MonsterCardTradingGame.Exceptions;
+using Npgsql;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Npgsql;
-using System.Data;
-using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.DAL.Repository
 {
     class UserRepository : IUserRepository
     {
-        DAL.Postgres.PostgresAccess db = DAL.Postgres.PostgresAccess.Instance;
+        Postgres.PostgresAccess db = Postgres.PostgresAccess.Instance;
         private const string TABLE_NAME = "player";
 
         /* 
@@ -21,8 +15,8 @@ namespace MonsterCardTradingGame.DAL.Repository
          */
         public void Create(Model.Credentials cred)
         {
-            Console.WriteLine($"[{DateTime.UtcNow}]\tCreate new user \"{cred.Username}\"");
-            
+            //Console.WriteLine($"[{DateTime.UtcNow}]\tCreate new user \"{cred.Username}\"");
+
             string sql = $"INSERT INTO {TABLE_NAME} (user_id, username, password) VALUES (@user_id, @username, @password)";
             try
             {
@@ -34,7 +28,8 @@ namespace MonsterCardTradingGame.DAL.Repository
                     command.Parameters.AddWithValue($"@password", cred.Password);
                     command.ExecuteNonQuery();
                 }
-            }catch(PostgresException e) when (e.SqlState == "23505") // User already exists
+            }
+            catch (PostgresException e) when (e.SqlState == "23505") // User already exists
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tError creating new user \"{cred.Username}\"\n{e.Message}");
                 throw new RepositoryException("User already exists");
@@ -51,8 +46,6 @@ namespace MonsterCardTradingGame.DAL.Repository
          */
         public Model.User GetByName(string username)
         {
-            Console.WriteLine($"[{DateTime.UtcNow}]\tGet user \"{username}\"");
-
             try
             {
                 using (var command = db.GetConnection().CreateCommand())
@@ -70,7 +63,7 @@ namespace MonsterCardTradingGame.DAL.Repository
                     int _coins = reader.GetInt32(3);
                     var _active_deck = reader.GetValue(4);
 
-                    if(_active_deck.ToString() == "")
+                    if (_active_deck.ToString() == "")
                     {
                         return new Model.User(Guid.Parse(_userid), _username, _password, _coins);
                     }
@@ -80,14 +73,14 @@ namespace MonsterCardTradingGame.DAL.Repository
                         return new Model.User(Guid.Parse(_userid), _username, _password, _coins, (Guid)Guid.Parse(deckid));
                     }
                 }
-            }catch (System.Exception e) when (e.Message == "No row is available")
+            }
+            catch (System.Exception e) when (e.Message == "No row is available")
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tUser \"{username}\" does not exist.");
                 throw new RepositoryException("User does not exist");
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
-                Console.WriteLine("Errror");
                 Console.WriteLine($"[{DateTime.UtcNow}]\tCould not get \"{username}\", {e.Message}");
                 throw new RepositoryException("Error");
             }
@@ -130,7 +123,7 @@ namespace MonsterCardTradingGame.DAL.Repository
 
         public Guid GetIdByUsername(string username)
         {
-            Console.WriteLine($"[{DateTime.UtcNow}]\tGet userid for \"{username}\"");
+            //Console.WriteLine($"[{DateTime.UtcNow}]\tGet userid for \"{username}\"");
 
             try
             {
@@ -144,7 +137,7 @@ namespace MonsterCardTradingGame.DAL.Repository
                     return Guid.Parse(userid);
                 }
             }
-            catch (System.Exception e) when (e.Message == "No row is available")
+            catch (Exception e) when (e.Message == "No row is available")
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tUser \"{username}\" does not exist.");
                 throw new RepositoryException("user not found");
@@ -155,7 +148,8 @@ namespace MonsterCardTradingGame.DAL.Repository
                 throw new RepositoryException("db error");
             }
         }
-        
+
+        /*
         public Model.User GetById(Guid userid)
         {
             string sql = $"SELECT * FROM {TABLE_NAME} WHERE user_id=@user_id;";
@@ -186,13 +180,9 @@ namespace MonsterCardTradingGame.DAL.Repository
                 throw; // Better Error Handeling
             }
         }
+        */
 
         /* Update */
-        public void Update(Model.User user)
-        {
-            throw new NotImplementedException();
-        }
-
         public void UpdateDeck(Guid userid, Guid deckid)
         {
             try
@@ -205,20 +195,14 @@ namespace MonsterCardTradingGame.DAL.Repository
                     command.Parameters.AddWithValue($"@deck_id", deckid.ToString());
                     command.Parameters.AddWithValue($"@user_id", userid.ToString());
                     var affectedRows = command.ExecuteNonQuery();
-                    Console.WriteLine($"[{DateTime.UtcNow}]\tAffected rows: {affectedRows}");
+                    //Console.WriteLine($"[{DateTime.UtcNow}]\tAffected rows: {affectedRows}");
                 }
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw; // Better Error Handeling
+                throw; 
             }
-        }
-
-        /* Delete */
-        public void Delete(Model.User user)
-        {
-            throw new NotImplementedException();
         }
     }
 }

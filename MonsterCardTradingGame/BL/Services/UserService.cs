@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using MonsterCardTradingGame.DAL.Repository;
 using MonsterCardTradingGame.Exceptions;
 using MonsterCardTradingGame.Model;
-using MonsterCardTradingGame.DAL.Repository;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace MonsterCardTradingGame.BL.Services
 {
@@ -18,7 +13,7 @@ namespace MonsterCardTradingGame.BL.Services
         public IUserRepository Userrepos;
         public IDeckRepository Deckrepos;
         private const string SALT_VALUE = "js83$0jolsod/";
-        
+
         /*
          *  Constructor
          */
@@ -45,6 +40,8 @@ namespace MonsterCardTradingGame.BL.Services
                 throw new ServiceException("invalid username");
             }
 
+            Console.WriteLine($"[{DateTime.UtcNow}]\tRegister new user \"{cred.Username}\"");
+
             // Hash the Password
             cred.Password = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 cred.Password,
@@ -57,16 +54,17 @@ namespace MonsterCardTradingGame.BL.Services
             // Add to Player Table
             try
             {
-                Userrepos.Create(new Model.Credentials(cred.Username, cred.Password));
+                Userrepos.Create(new Credentials(cred.Username, cred.Password));
                 return true;
             }
-            catch(RepositoryException e) when (e.Message == "User already exists")
+            catch (RepositoryException e) when (e.Message == "User already exists")
             {
                 throw new ServiceException("user already exists");
             }
-            catch {
+            catch
+            {
                 throw new ServiceException("db error");
-            } 
+            }
         }
 
         /*
@@ -74,19 +72,23 @@ namespace MonsterCardTradingGame.BL.Services
          */
         public string Login(Utility.Json.CredentialsJson cred)
         {
+            Console.WriteLine($"[{DateTime.UtcNow}]\tLogin \"{cred.Username}\"");
+
             string passwordFromDB;
             try
             {
                 User user = Userrepos.GetByName(cred.Username);
                 passwordFromDB = user.Password;
             }
-            catch(RepositoryException e) when (e.Message == "user not found")
+            catch (RepositoryException e) when (e.Message == "user not found")
             {
-                throw new ServiceException("user not found"); 
-            }catch
+                throw new ServiceException("user not found");
+            }
+            catch
             {
                 throw new ServiceException("db error");
             }
+
 
             // Hash the pw the user entered:
             cred.Password = Convert.ToBase64String(KeyDerivation.Pbkdf2(
@@ -123,7 +125,7 @@ namespace MonsterCardTradingGame.BL.Services
                 return false;
             }
         }
-        
+
         /*
         *  Get userid via username
         */
@@ -158,12 +160,12 @@ namespace MonsterCardTradingGame.BL.Services
                 deck = null;
                 return false;
             }
-        }    
+        }
 
         /*
          *  Show all decks of user, returns List<Deck> decks
          */
-        public  List<Deck> GetAllDecks(Guid userid)
+        public List<Deck> GetAllDecks(Guid userid)
         {
             try
             {
@@ -173,9 +175,6 @@ namespace MonsterCardTradingGame.BL.Services
             {
                 throw;
             }
-            
-            
-            throw new NotImplementedException();
         }
 
         /*
@@ -188,37 +187,39 @@ namespace MonsterCardTradingGame.BL.Services
             {
                 Userrepos.UpdateDeck(userid, deck_id);
             }
-            catch { 
-                throw; // Update failed
+            catch
+            {
+                throw; 
             }
         }
 
         /*
         *  Add new deck to decks-table
         */
-        public  void AddNewDeck(Utility.Json.DeckJson deck, Guid owner)
+        public void AddNewDeck(Utility.Json.DeckJson deck, Guid owner)
         {
             Console.WriteLine($"[{DateTime.UtcNow}]\tCreate new Deck \"{deck.Title}\" ");
 
             // Validate, only 5 cards per deck
-            if(deck.Cards.Length != 5)
+            if (deck.Cards.Length != 5)
             {
-                throw new HttpException("invalid card count");
+                throw new ServiceException("invalid card count");
             }
-
+            Console.WriteLine("Another here");
             try
             {
                 Deckrepos.AddDeck(deck, owner);
             }
-            catch
+            catch(Exception e)
             {
-                throw new HttpException("not found");
+                Console.WriteLine(e.Message);
+                throw new ServiceException("db error");
             }
         }
-        
+
         #endregion
         #region helper
-        
+
         /*
          *  Helper
          */
@@ -230,7 +231,8 @@ namespace MonsterCardTradingGame.BL.Services
 
         private static bool ValidateUsername(string username)
         {
-            if (username.Length > 20) {
+            if (username.Length > 20)
+            {
                 return false;
             }
             return true;

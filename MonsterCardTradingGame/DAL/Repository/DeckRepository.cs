@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MonsterCardTradingGame.Exceptions;
+﻿using MonsterCardTradingGame.Exceptions;
 using MonsterCardTradingGame.Model;
 using Npgsql;
+using System;
+using System.Collections.Generic;
 
 namespace MonsterCardTradingGame.DAL.Repository
 {
@@ -20,7 +17,9 @@ namespace MonsterCardTradingGame.DAL.Repository
          */
         public void AddDeck(Utility.Json.DeckJson deck, Guid owner)
         {
-            Guid deckid = Guid.NewGuid();
+            Guid deckid = deck.Id == null ? Guid.NewGuid() : Guid.Parse(deck.Id);
+            Console.WriteLine("HEre");
+            Console.WriteLine(deckid);
             try
             {
                 using (var transaction = db.GetConnection().BeginTransaction())
@@ -29,13 +28,13 @@ namespace MonsterCardTradingGame.DAL.Repository
                     using (var command = db.GetConnection().CreateCommand())
                     {
                         string sql = $"INSERT INTO {TABLE_NAME} (deck_id, owner, title) VALUES (@deck_id, @owner, @title)";
-                        //Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
+                        Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
                         command.CommandText = sql;
-                        command.Parameters.AddWithValue($"@deck_id", deckid);
+                        command.Parameters.AddWithValue($"@deck_id", deckid.ToString());
                         command.Parameters.AddWithValue($"@owner", owner.ToString());
                         command.Parameters.AddWithValue($"@title", deck.Title);
                         int affectedRows = command.ExecuteNonQuery();
-                        //Console.WriteLine($"[{DateTime.UtcNow}]\tAffected rows: {affectedRows}");
+                        Console.WriteLine($"[{DateTime.UtcNow}]\tAffected rows: {affectedRows}");
                     }
 
                     // Check if Cards are owned by user ???
@@ -46,12 +45,12 @@ namespace MonsterCardTradingGame.DAL.Repository
                         using (var command = db.GetConnection().CreateCommand())
                         {
                             string sql = $"INSERT INTO {TABLE_NAME_REL} (deck_id, card_id) VALUES (@deck_id, @card_id)";
-                            //Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
+                            Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
                             command.CommandText = sql;
                             command.Parameters.AddWithValue($"@deck_id", deckid);
                             command.Parameters.AddWithValue($"@card_id", card);
                             int affectedRows = command.ExecuteNonQuery();
-                            //Console.WriteLine($"[{DateTime.UtcNow}]\tAffected rows: {affectedRows}");
+                            Console.WriteLine($"[{DateTime.UtcNow}]\tAffected rows: {affectedRows}");
                         }
                     }
 
@@ -168,7 +167,7 @@ namespace MonsterCardTradingGame.DAL.Repository
                     using (var command = db.GetConnection().CreateCommand())
                     {
                         string sql = $"SELECT * FROM cards_in_deck cd JOIN card c ON cd.card_id = c.card_id WHERE cd.deck_id=@deck_id;";
-                        Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
+                        //Console.WriteLine($"[{DateTime.UtcNow}]\tExecute SQL-Statement: {sql}");
 
                         command.CommandText = sql;
                         command.Parameters.AddWithValue("@deck_id", userid.ToString());

@@ -55,9 +55,21 @@ namespace MonsterCardTradingGame.PL.Controller
         public static HttpResponse Login(HttpRequest req)
         {
             HttpResponse res;
-
-            var cred = JsonConvert.DeserializeObject<Utility.Json.CredentialsJson>(req.Content);
             string token;
+            Utility.Json.CredentialsJson cred;
+            
+            try
+            {
+                cred = JsonConvert.DeserializeObject<Utility.Json.CredentialsJson>(req.Content);
+
+            }
+            catch
+            {
+                res = new HttpResponse(HttpStatusCode.BadRequest);
+                res.AddContent("application/json", "{\"message\":\"Could not parse content\"}");
+                return res;
+            }
+
             try
             {
                 token = UserService.Login(cred);
@@ -185,32 +197,44 @@ namespace MonsterCardTradingGame.PL.Controller
         public static HttpResponse AddNewDeck(HttpRequest req)
         {
             HttpResponse res;
-
+            Console.WriteLine("Add ne Deck");
             // Valid token?
-            if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
+            if (!AuthService.AuthToken(req.Headers, out string username, out Guid userid))
             {
                 // no -> send error response
                 res = new HttpResponse(HttpStatusCode.Forbidden);
                 res.AddContent("application/json", "{\"message\":\"Access denied. Please Login.\"}");
                 return res;
             }
-
+           
+            Console.WriteLine($"[{DateTime.UtcNow}]\t Add new Deck for \"{username}\"");
+            Console.WriteLine("username");
             if (!UserService.GetUserByUsername(username, out User user))
             {
                 res = new HttpResponse(HttpStatusCode.InternalServerError);
                 res.AddContent("application/json", "{\"message\":\"User not found\"}");
                 return res;
             }
-              
-            var deckJson = JsonConvert.DeserializeObject<Utility.Json.DeckJson>(req.Content);
+
+            Utility.Json.DeckJson deckJson;
             try
             {
-                UserService.AddNewDeck(deckJson, user.UserId);
+                 deckJson = JsonConvert.DeserializeObject<Utility.Json.DeckJson>(req.Content);
             }
             catch
             {
                 res = new HttpResponse(HttpStatusCode.InternalServerError);
-                res.AddContent("application/json", "{\"response\":\"Create new Deck\"}");
+                res.AddContent("application/json", "{\"message\":\"Could not parse content\"}");
+                return res;
+            }
+
+            try
+            {
+                UserService.AddNewDeck(deckJson, user.UserId);
+            }catch
+            {
+                res = new HttpResponse(HttpStatusCode.InternalServerError);
+                res.AddContent("application/json", "{\"response\":\"Something went wrong.\"}");
                 return res;
             }
 
@@ -254,25 +278,6 @@ namespace MonsterCardTradingGame.PL.Controller
             return res;
         }
 
-        #endregion
-        #region userprofile
-
-        /*
-         *  /users/username, GET
-         */
-        public static HttpResponse ShowProfile(Server.HttpRequest req)
-        {
-            throw new NotImplementedException();
-        }
-
-        /*
-         *  /users/username, PUT
-         */
-        public static HttpResponse ChangeProfile(Server.HttpRequest req)
-        {
-            throw new NotImplementedException();
-        }
-        
         #endregion
     }
 }

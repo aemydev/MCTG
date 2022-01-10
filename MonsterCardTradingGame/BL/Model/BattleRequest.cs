@@ -1,19 +1,14 @@
-﻿using MonsterCardTradingGame.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace MonsterCardTradingGame.Model
 {
-    public enum RequestState {Pending, Accepted };
-    
+    public enum RequestState { Pending, Accepted };
+
     class BattleRequest
     {
         public User Player1 { get; init; }
         public User Player2 { get; set; }
-        public RequestState RequestState{ get; private set;}
+        public RequestState RequestState { get; private set; }
 
         // Event
         public event EventHandler<OnAcceptedArgs> OnAccepted;

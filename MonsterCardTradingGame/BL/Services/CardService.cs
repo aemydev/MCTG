@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MonsterCardTradingGame.Exceptions;
+﻿using MonsterCardTradingGame.Exceptions;
 using MonsterCardTradingGame.Model;
-using MonsterCardTradingGame.DAL;
+using System;
+using System.Collections.Generic;
 
 namespace MonsterCardTradingGame.BL.Services
-{ 
+{
     public class CardService
     {
         public static DAL.Repository.ICardRepository cardrepos;
@@ -33,13 +29,12 @@ namespace MonsterCardTradingGame.BL.Services
         public void AddPackage(List<Card> cards)
         {
             // Validate the Cards to be added
-            if(cards.Count > 5)
+            if (cards.Count > 5)
             {
                 throw new ServiceException("too many cards");
-
             }
-            
-            if(cards.Count < 5)
+
+            if (cards.Count < 5)
             {
                 throw new ServiceException("not enough cards");
             }
@@ -78,21 +73,19 @@ namespace MonsterCardTradingGame.BL.Services
          */
         public IEnumerable<Model.Card> AquirePackage(string username)
         {
-            Console.WriteLine($"[{DateTime.UtcNow}]\tAquire new Package for \"{username}\"");
-
             // Try to get user from db:
             if (!UserService.GetUserByUsername(username, out User user))
             {
                 throw new ServiceException("user not found");
             }
-            
+
             // enough coins to buy package?
-            if(user.Coins < 5)
+            if (user.Coins < 5)
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tError: user \"{username}\" has not enough money");
-                throw new ServiceException("no money"); 
+                throw new ServiceException("no money");
             }
-     
+
             // get package
             try
             {

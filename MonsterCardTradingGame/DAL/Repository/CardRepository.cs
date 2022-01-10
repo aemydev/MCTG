@@ -119,7 +119,7 @@ namespace MonsterCardTradingGame.DAL.Repository
                     return cards;
                 }
             }
-            catch (Exception e)
+            catch
             {
                 //Console.WriteLine(e.Message);
                 throw; // Better Error Handeling

@@ -191,6 +191,7 @@ echo.
 REM --------------------------------------------------
 echo 17) battle
 start /b "altenhof battle" curl -X GET http://localhost:10001/battle/new --header "Authorization: Basic altenhof-mtcgToken"
+ping localhost -n 5>NUL 2>NUL
 start /b "kienboec battle" curl -X GET http://localhost:10001/battle/find --header "Authorization: Basic kienboec-mtcgToken"
 ping localhost -n 10 >NUL 2>NUL
 echo.

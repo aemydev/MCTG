@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Server
 {
@@ -17,7 +13,7 @@ namespace MonsterCardTradingGame.Server
         public string serverName = "MonsterCardTradingGameServer";
         public Server.Router.Router router = new Server.Router.Router();
         public ConcurrentQueue<Model.Battle> games = new();
-        
+
         private TcpListener listener;
 
         public HttpServer(int port, string ip = "")
@@ -39,7 +35,7 @@ namespace MonsterCardTradingGame.Server
 
                 HttpProcessor processor = new HttpProcessor(sock, this);
 
-                new Thread(processor.Process).Start(); 
+                new Thread(processor.Process).Start();
 
                 Thread.Sleep(1);
             }

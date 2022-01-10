@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Model
 {
@@ -15,7 +11,7 @@ namespace MonsterCardTradingGame.Model
         public Guid? ActiveDeckId { get; private set; }
         public Model.Card[] Deck { get; set; }
 
-        public User(Guid userid, string name, string password, int coins = 20, Guid? deckid=null)
+        public User(Guid userid, string name, string password, int coins = 20, Guid? deckid = null)
         {
             this.UserId = userid;
             this.Username = name;

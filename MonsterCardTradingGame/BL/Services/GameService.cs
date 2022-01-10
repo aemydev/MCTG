@@ -1,6 +1,7 @@
-﻿using MonsterCardTradingGame.Model;
-using MonsterCardTradingGame.Exceptions;
+﻿using MonsterCardTradingGame.Exceptions;
+using MonsterCardTradingGame.Model;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace MonsterCardTradingGame.BL.Services
@@ -12,6 +13,7 @@ namespace MonsterCardTradingGame.BL.Services
         private static bool gameEnded;
         private static bool accepted;
         private static string Winner;
+        private static List<string> BattleLog;
 
         public GameService()
         {
@@ -20,16 +22,14 @@ namespace MonsterCardTradingGame.BL.Services
             Winner = "";
         }
 
-        public string StartBattle(string username)
+        public BattleResult StartBattle(string username)
         {
-            Console.WriteLine($"[{DateTime.UtcNow}\t StartBattle({username})");
-
             // Active deck set for user?
-            if(!UserService.GetUserByUsername(username, out User user))
+            if (!UserService.GetUserByUsername(username, out User user))
             {
                 throw new ServiceException("user not found");
             }
-            
+
             if (user.ActiveDeckId.ToString() == "")
             {
                 Console.WriteLine($"[{DateTime.UtcNow}]\tError: No active deck set for \"{username}\"");
@@ -39,23 +39,23 @@ namespace MonsterCardTradingGame.BL.Services
             // Create new Battle-Request
             BattleRequest battleReq = new BattleRequest(user);
             Program.BattleRequest.Enqueue(battleReq);
-            
+
             Console.WriteLine($"[{DateTime.UtcNow}\t New Battle Request created. Waiting for other players to join ...)");
 
             // Subscribe to event
             battleReq.OnAccepted += StartBattle_BattleReq_OnAccepted;
-            
+
             while (!accepted)
             {
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
             }
 
             while (!gameEnded)
             {
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
             }
 
-            return Winner;
+            return new BattleResult(Winner, BattleLog);
         }
 
         /*
@@ -71,26 +71,25 @@ namespace MonsterCardTradingGame.BL.Services
             battle.OnBattleEnd += Start_Battle_Battle_OnBattleEnd;
             battle.Start();
         }
-   
+
         private static void Start_Battle_Battle_OnBattleEnd(object sender, Battle.OnBattleEndArgs e)
         {
-            Console.WriteLine($"[{DateTime.Now}]\t OnBattleEnd-Event invoked. Set gameEnded = true");
             Winner = e.winner;
-            gameEnded = true;   
+            BattleLog = e.battleLog;
+            gameEnded = true;
         }
 
         /*
          *  Search for and join Battle
          */
-        public string JoinBattle(string username)
+        public BattleResult JoinBattle(string username)
         {
-            Console.WriteLine($"[{DateTime.UtcNow}\t JoinBattle({username})");
-            
             // Active deck set for user?
-            if(!UserService.GetUserByUsername(username, out User user)){
+            if (!UserService.GetUserByUsername(username, out User user))
+            {
                 throw new Exception("user not found");
             }
-           
+
             if (user.ActiveDeckId.ToString() == "")
             {
                 throw new HttpException("deck not set");
@@ -101,7 +100,7 @@ namespace MonsterCardTradingGame.BL.Services
             bool stopSearch = false;
             Guid battleId;
 
-            Console.WriteLine($"[{DateTime.UtcNow}\t ({username}) is searching for a battle...");
+            Console.WriteLine($"[{DateTime.UtcNow}\t \"{username}\" is searching for a battle...");
 
             while (!stopSearch)
             {
@@ -110,7 +109,8 @@ namespace MonsterCardTradingGame.BL.Services
                     stopSearch = true;
                     throw new GameException("no game found"); // Time is up, no battles found
                 }
-                else if (Program.BattleRequest.TryDequeue(out BattleRequest battleReq)){
+                else if (Program.BattleRequest.TryDequeue(out BattleRequest battleReq))
+                {
                     stopSearch = true;
                     battleId = battleReq.Accept(user);
                     Program.battles[battleId].OnBattleEnd += Join_Battle_Battle_OnBattleEnd;
@@ -119,16 +119,17 @@ namespace MonsterCardTradingGame.BL.Services
 
             while (!gameEnded)
             {
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
             }
 
-            return Winner;
+            return new BattleResult(Winner,BattleLog);
         }
 
         private static void Join_Battle_Battle_OnBattleEnd(object sender, Battle.OnBattleEndArgs e)
         {
             Console.WriteLine($"[{DateTime.Now}]\tOnBattleEnd-Event invoked. Set gameEnded = true");
             Winner = e.winner;
+            BattleLog = e.battleLog;
             gameEnded = true;
 
             //Program.battles[e.battleid].Status = BattleStates.Done;

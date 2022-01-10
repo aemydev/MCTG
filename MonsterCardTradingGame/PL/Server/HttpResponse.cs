@@ -15,7 +15,6 @@ namespace MonsterCardTradingGame.Server
         public Dictionary<string, string> Headers { get; set; }
         private Dictionary<HttpStatusCode, string> StatusCodeString;
 
-
         public HttpResponse(HttpStatusCode statusCode)
         {
             initStatusCodes(); 
@@ -36,7 +35,6 @@ namespace MonsterCardTradingGame.Server
             StatusCodeString.Add(HttpStatusCode.InternalServerError, "500");
             StatusCodeString.Add(HttpStatusCode.Unauthorized, "401");
             StatusCodeString.Add(HttpStatusCode.BadRequest, "400");
-
         }
 
         /*

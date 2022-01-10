@@ -1,17 +1,14 @@
 ﻿using MonsterCardTradingGame.BL.Services;
 using MonsterCardTradingGame.Exceptions;
-using MonsterCardTradingGame.Model;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace MonsterCardTradingGame.Model
 {
     public enum BattleStates { Running, Done }
     public enum Player { player1, player2, draw }
     // Producer
-    public enum WinLose { Winner, Loser, Draw}
+    public enum WinLose { Winner, Loser, Draw }
 
     public class Battle
     {
@@ -22,7 +19,7 @@ namespace MonsterCardTradingGame.Model
         public User Player1 { get; private set; }
         public User Player2 { get; private set; }
         public string Winner { get; private set; }
-        public List<String> Log { get; private set; }
+        public List<string> Log { get; private set; } = new();
         private const int MAX_ROUNDS = 100;
 
         // Events:
@@ -32,6 +29,7 @@ namespace MonsterCardTradingGame.Model
             public string winner;
             public Guid battleid;
             public bool scoreboardentry = false;
+            public List<string> battleLog;
         }
 
         /*
@@ -61,7 +59,7 @@ namespace MonsterCardTradingGame.Model
 
             // Game-Loop
             Winner = GameLoop(gameDeck1, gameDeck2);
-            Console.WriteLine($"[{DateTime.UtcNow}]\tBatte ended. The winner is {Winner}!");
+            AddToBattlog($"[{DateTime.UtcNow}]\tBatte ended. The winner is {Winner}!");
 
             // Transfer the Cards from loser -> winner, Persist in DB
             // add cards from losing player to stack of other player?
@@ -74,7 +72,7 @@ namespace MonsterCardTradingGame.Model
                 eloPlayer1 = CalcElo(WinLose.Winner);
                 eloPlayer2 = CalcElo(WinLose.Loser);
             }
-            else if(Winner == Player2.Username)
+            else if (Winner == Player2.Username)
             {
                 eloPlayer1 = CalcElo(WinLose.Loser);
                 eloPlayer2 = CalcElo(WinLose.Winner);
@@ -88,15 +86,16 @@ namespace MonsterCardTradingGame.Model
             bool scoreboardEntry_ = true;
             try
             {
-                BL.Services.ScoreboardService.AddEntry(new ScoreboardEntry(Player1.UserId, eloPlayer1));
-                BL.Services.ScoreboardService.AddEntry(new ScoreboardEntry(Player2.UserId, eloPlayer2));
-            }catch(System.Exception e)
+                ScoreboardService.AddEntry(new ScoreboardEntry(Player1.UserId, eloPlayer1));
+                ScoreboardService.AddEntry(new ScoreboardEntry(Player2.UserId, eloPlayer2));
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 scoreboardEntry_ = false;
             }
-           
-            OnBattleEnd?.Invoke(this, new OnBattleEndArgs { winner = Winner, battleid = Id, scoreboardentry = scoreboardEntry_ });
+
+            OnBattleEnd?.Invoke(this, new OnBattleEndArgs { winner = Winner, battleid = Id, scoreboardentry = scoreboardEntry_, battleLog = Log });
         }
 
         /*
@@ -122,39 +121,39 @@ namespace MonsterCardTradingGame.Model
                 Card p1card = SelectRandomCard(gameDeck1.Cards);
                 Card p2card = SelectRandomCard(gameDeck2.Cards);
 
-                Console.WriteLine($"[{DateTime.UtcNow}, Id: {Id}]\tRound {currentRound}: {Player1.Username}: \"{ p1card.Title}, Damage: {p1card.Damage}\" vs. {Player2.Username}: \"{ p2card.Title}, Damage: { p2card.Damage}\"");
-
+                AddToBattlog("Round {currentRound}: {Player1.Username}: \"{ p1card.Title}, Damage: {p1card.Damage}\" vs. {Player2.Username}: \"{ p2card.Title}, Damage: { p2card.Damage}\"");
                 Guid winnerCard = EvaluateCards(p1card, p2card);
 
                 // Exchange the Cards
-                if(winnerCard == p1card.CardID)
+                if (winnerCard == p1card.CardID)
                 {
                     // Player1 gets card from player 2
-                    Console.WriteLine($"[{DateTime.UtcNow}, {Id}]\t\"{Player1.Username}\" wins round {currentRound}");
-                    Console.WriteLine($"[{DateTime.UtcNow}, {Id}]\t\"{p2card.Title},{ p2card.Description}, { p2card.Damage}\" has been added to {Player1.Username}'s deck");
+                    AddToBattlog($"\"{Player1.Username}\" wins round {currentRound}");
+                    AddToBattlog($"\"{p2card.Title},{ p2card.Description}, { p2card.Damage}\" has been added to {Player1.Username}'s deck");
 
                     gameDeck1.Cards.Add(p2card);
                     gameDeck2.Cards.Remove(p2card);
 
-                }else if(winnerCard == p2card.CardID)
+                }
+                else if (winnerCard == p2card.CardID)
                 {
                     // player2 gets card of player1
-                    Console.WriteLine($"[{DateTime.UtcNow}, BattleId {Id}]\t{Player2.Username} wins round {currentRound}");
-                    Console.WriteLine($"[{DateTime.UtcNow}, {Id}]\t\"{p1card.Title},{ p1card.Description}, { p1card.Damage}\" has been added to {Player2.Username}'s deck");
+                    AddToBattlog($"{Player2.Username} wins round {currentRound}");
+                    AddToBattlog($"\"{p1card.Title},{ p1card.Description}, { p1card.Damage}\" has been added to {Player2.Username}'s deck");
                     gameDeck2.Cards.Add(p1card);
                     gameDeck1.Cards.Remove(p1card);
                 }
                 else
                 {
                     // nothing happens
-                    Console.WriteLine($"[{DateTime.UtcNow}, {Id}]\tNo cards exchanged.");
+                    AddToBattlog($"\tDraw. No cards exchanged.");
                 }
 
                 // Is Game End?
                 if (gameDeck1.Cards.Count == 0)
                 {
                     battleEnd = true;
-                    winnerString= Player2.Username;
+                    winnerString = Player2.Username;
                 }
                 else if (gameDeck2.Cards.Count == 0)
                 {
@@ -337,8 +336,9 @@ namespace MonsterCardTradingGame.Model
             // Fight 
             if (p1Damage > p2Damage)
             {
-                return p1card.CardID;       
-            }else if(p1Damage == p2Damage)
+                return p1card.CardID;
+            }
+            else if (p1Damage == p2Damage)
             {
                 return Guid.Empty;
             }
@@ -346,17 +346,15 @@ namespace MonsterCardTradingGame.Model
             {
                 return p2card.CardID;
             }
-
-
         }
-        
+
         private int CalcElo(WinLose winOrLose)
         {
-            if(winOrLose == WinLose.Winner)
+            if (winOrLose == WinLose.Winner)
             {
                 return 3;
             }
-            else if(winOrLose == WinLose.Loser)
+            else if (winOrLose == WinLose.Loser)
             {
                 return -5;
             }
@@ -366,6 +364,13 @@ namespace MonsterCardTradingGame.Model
             }
         }
 
+        private void AddToBattlog(string msg)
+        {
+            string logMsg = $"[{DateTime.UtcNow}, {Id}]\t{msg}";
+            Console.WriteLine(logMsg);
+            Log.Add(logMsg);
+        }
+
         /*
          *  For Testing:
          */
@@ -373,7 +378,7 @@ namespace MonsterCardTradingGame.Model
         {
             return EvaluateCards(p1card, p2card);
         }
-        
+
         public int CallCalculateElo(WinLose winLose)
         {
             return CalcElo(winLose);

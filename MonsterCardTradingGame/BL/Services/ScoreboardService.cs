@@ -1,9 +1,6 @@
 ﻿using MonsterCardTradingGame.Model;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.BL.Services
 {
@@ -62,8 +59,7 @@ namespace MonsterCardTradingGame.BL.Services
             {
                 userscore = null;
                 return false;
-            }            
-            
+            }
         }
 
         public static bool GetScoreboard(Guid userid, out List<ScoreboardEntry> scoreboard)
@@ -78,7 +74,6 @@ namespace MonsterCardTradingGame.BL.Services
                 scoreboard = null;
                 return false;
             }
-
         }
     }
 }

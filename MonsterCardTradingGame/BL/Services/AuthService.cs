@@ -1,11 +1,7 @@
 ﻿using MonsterCardTradingGame.Server;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using MonsterCardTradingGame.Exceptions;
 
 namespace MonsterCardTradingGame.BL.Services
 {
@@ -35,8 +31,9 @@ namespace MonsterCardTradingGame.BL.Services
                     string[] tokenSplitBySpace = token.Split(' ');
                     string[] tokenSplitByDash = tokenSplitBySpace[1].Split('-');
                     string usernameToken = tokenSplitByDash[0];
-                    
-                    if(IsRegistered(usernameToken, out Guid userid_)){
+
+                    if (IsRegistered(usernameToken, out Guid userid_))
+                    {
                         Console.WriteLine($"[{DateTime.UtcNow}]\tToken \"{token}\" is valid for \"{userid_}: {usernameToken}\"");
                         username = usernameToken;
                         userid = userid_;
@@ -52,7 +49,7 @@ namespace MonsterCardTradingGame.BL.Services
                 Console.WriteLine($"[{DateTime.UtcNow}]\tAuthorization failed: Unknown token format");
             }
 
-            Console.WriteLine($"[{DateTime.UtcNow}]\tAuthorization failed: Token not set");  
+            Console.WriteLine($"[{DateTime.UtcNow}]\tAuthorization failed: Token not set");
             return false;
         }
 
@@ -86,7 +83,7 @@ namespace MonsterCardTradingGame.BL.Services
 
         private static bool IsRegistered(string username, out Guid userid)
         {
-            if(UserService.GetIdByUsername(username, out userid))
+            if (UserService.GetIdByUsername(username, out userid))
             {
                 return true;
             }

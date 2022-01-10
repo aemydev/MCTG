@@ -3,10 +3,7 @@ using MonsterCardTradingGame.Server;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.PL.Controller
 {
@@ -23,6 +20,8 @@ namespace MonsterCardTradingGame.PL.Controller
                 res.AddContent("application/json", "{\"message\":\"Access denied. Invalid token.\"}");
                 return res;
             }
+
+            Console.WriteLine($"[{DateTime.UtcNow}]\tGet Scorboard");
 
             try
             {
@@ -54,6 +53,8 @@ namespace MonsterCardTradingGame.PL.Controller
                 res.AddContent("application/json", "{\"message\":\"Access denied. Invalid token.\"}");
                 return res;
             }
+
+            Console.WriteLine($"[{DateTime.UtcNow}]\tGet Stats of \"{username}\"");
 
             try
             {

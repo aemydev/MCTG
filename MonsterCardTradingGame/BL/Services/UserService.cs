@@ -189,7 +189,7 @@ namespace MonsterCardTradingGame.BL.Services
             }
             catch
             {
-                throw; 
+                throw;
             }
         }
 
@@ -205,12 +205,11 @@ namespace MonsterCardTradingGame.BL.Services
             {
                 throw new ServiceException("invalid card count");
             }
-            Console.WriteLine("Another here");
             try
             {
                 Deckrepos.AddDeck(deck, owner);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 throw new ServiceException("db error");

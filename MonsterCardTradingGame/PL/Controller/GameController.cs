@@ -1,5 +1,7 @@
 ﻿using MonsterCardTradingGame.Exceptions;
+using MonsterCardTradingGame.Model;
 using MonsterCardTradingGame.Server;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,7 +20,7 @@ namespace MonsterCardTradingGame.PL.Controller
         public static HttpResponse NewBattle(HttpRequest req)
         {
             HttpResponse res;
-            String winner;
+            BattleResult gameres;
 
             // Valid token?
             if (!BL.Services.AuthService.AuthToken(req.Headers, out string username, out Guid userid))
@@ -32,7 +34,7 @@ namespace MonsterCardTradingGame.PL.Controller
 
             try
             {
-                winner = game.StartBattle(username);
+                gameres = game.StartBattle(username);
 
             }catch(GameException e) when (e.Message =="no deck set")
             {
@@ -54,8 +56,10 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
+            string jsonString = JsonConvert.SerializeObject(gameres);
+
             res = new HttpResponse(HttpStatusCode.OK);
-            res.AddContent("application/json", $"{{\"message\":\"Battle Ended. {winner} won the Battle\"}}");
+            res.AddContent("application/json", $"{{\"message\":\"Battle Ended. {gameres.Winner} won the Battle \",\"content\":{jsonString}}}");
             return res;
         }
 
@@ -74,12 +78,11 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
-            string winner;
             BL.Services.GameService game = new();
-
+            BattleResult gameres;
             try
             {
-                winner = game.JoinBattle(username);
+                gameres = game.JoinBattle(username);
             }
             catch (GameException e) when (e.Message == "no deck set")
             {
@@ -93,7 +96,7 @@ namespace MonsterCardTradingGame.PL.Controller
                 res.AddContent("application/json", "{\"message\":\"Currently are not battles availiable.\"}");
                 return res;
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 res = new HttpResponse(HttpStatusCode.InternalServerError);
@@ -101,8 +104,10 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
+            string jsonString = JsonConvert.SerializeObject(gameres);
+
             res = new HttpResponse(HttpStatusCode.OK);
-            res.AddContent("application/json",$"{{\"message\":\"Battle Ended. {winner} won the Battle \"}}");
+            res.AddContent("application/json",$"{{\"message\":\"Battle Ended. {gameres.Winner} won the Battle \",\"content\":{jsonString}}}");
             return res;
         }
     }

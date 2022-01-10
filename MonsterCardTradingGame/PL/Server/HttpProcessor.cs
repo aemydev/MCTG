@@ -1,12 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MonsterCardTradingGame.Server
 {
@@ -32,7 +29,7 @@ namespace MonsterCardTradingGame.Server
             StreamWriter writer = new StreamWriter(socket.GetStream()) { AutoFlush = true };
             NetworkStream reader = socket.GetStream();
 
-            Console.WriteLine($"[{DateTime.UtcNow}]\tClient connected.");
+            Console.WriteLine($"[{DateTime.UtcNow}]\tClient connected.\n");
 
             // Parse the Request
             HttpRequest httpRequest = ParseHeader(reader);
@@ -59,21 +56,23 @@ namespace MonsterCardTradingGame.Server
              */
             HttpResponse res;
 
-            if (httpRequest.Method.Equals("POST") && httpServer.router.PostRoutes.ContainsKey(httpRequest.Path)) {
+            if (httpRequest.Method.Equals("POST") && httpServer.router.PostRoutes.ContainsKey(httpRequest.Path))
+            {
                 res = httpServer.router.PostRoutes[httpRequest.Path](httpRequest);
-            }else if (httpRequest.Method.Equals("GET") && httpServer.router.GetRoutes.ContainsKey(httpRequest.Path))
+            }
+            else if (httpRequest.Method.Equals("GET") && httpServer.router.GetRoutes.ContainsKey(httpRequest.Path))
             {
                 res = httpServer.router.GetRoutes[httpRequest.Path](httpRequest);
             }
-            else if (httpRequest.Method.Equals("PUT") && httpServer.router.PutRoutes.ContainsKey(httpRequest.Path)){
-                Console.WriteLine("Test");
+            else if (httpRequest.Method.Equals("PUT") && httpServer.router.PutRoutes.ContainsKey(httpRequest.Path))
+            {
                 res = httpServer.router.PutRoutes[httpRequest.Path](httpRequest);
             }
             else
             {
                 // Error 404 - Not found
                 res = new HttpResponse(HttpStatusCode.NotFound);
-                res.AddContent("application/json", "{\"response\":\"Error 404 - not found\"}");
+                res.AddContent("application/json", "{\"message\":\"Error 404 - Not Found\"}");
             }
 
             res.Send(writer, httpServer.serverName);
@@ -120,13 +119,13 @@ namespace MonsterCardTradingGame.Server
          */
         private string ParseContent(NetworkStream reader, string contentLength)
         {
-           int totalBytes = Convert.ToInt32(contentLength);
+            int totalBytes = Convert.ToInt32(contentLength);
 
-           byte[] data = new BinaryReader(reader).ReadBytes(totalBytes);
+            byte[] data = new BinaryReader(reader).ReadBytes(totalBytes);
 
-           string Content = Encoding.UTF8.GetString(data);
+            string Content = Encoding.UTF8.GetString(data);
 
-           return Content; 
+            return Content;
         }
 
         /*

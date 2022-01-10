@@ -128,10 +128,12 @@ namespace MonsterCardTradingGame.PL.Controller
                 return res;
             }
 
+            Console.WriteLine(username);
             try{
+
                cards = cardService.AquirePackage(username);
             }
-            catch (ServiceException e) when (e.Message == "error getting user")
+            catch (ServiceException e) when (e.Message == "user not found")
             {
                 res = new HttpResponse(HttpStatusCode.NotFound);
                 res.AddContent("application/json", "{\"message\":\"Could not get user.\"}");

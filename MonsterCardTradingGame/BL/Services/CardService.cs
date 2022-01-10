@@ -83,7 +83,7 @@ namespace MonsterCardTradingGame.BL.Services
             // Try to get user from db:
             if (!UserService.GetUserByUsername(username, out User user))
             {
-                throw new ServiceException("error getting user");
+                throw new ServiceException("user not found");
             }
             
             // enough coins to buy package?

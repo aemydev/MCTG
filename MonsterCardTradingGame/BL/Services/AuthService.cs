@@ -38,6 +38,7 @@ namespace MonsterCardTradingGame.BL.Services
                     
                     if(IsRegistered(usernameToken, out Guid userid_)){
                         Console.WriteLine($"[{DateTime.UtcNow}]\tToken \"{token}\" is valid for \"{userid_}: {usernameToken}\"");
+                        username = usernameToken;
                         userid = userid_;
                         return true;
                     }

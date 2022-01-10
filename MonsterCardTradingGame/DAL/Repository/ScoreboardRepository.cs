@@ -77,7 +77,7 @@ namespace MonsterCardTradingGame.DAL.Repository
             {
                 using (var command = db.GetConnection().CreateCommand())
                 {
-                    string sql = $"SELECT * FROM {TABLE_NAME} ORDER BY elo;";
+                    string sql = $"SELECT * FROM {TABLE_NAME} ORDER BY elo DESC;";
                     command.CommandText = sql;
 
                     using NpgsqlDataReader reader = command.ExecuteReader();

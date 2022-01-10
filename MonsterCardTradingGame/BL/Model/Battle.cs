@@ -176,7 +176,7 @@ namespace MonsterCardTradingGame.Model
 
         private Guid EvaluateCards(Card p1card, Card p2card)
         {
-            int p1Damage = p1card.Damage, p2Damage = p2card.Damage;
+            float p1Damage = (float)p1card.Damage, p2Damage = (float)p2card.Damage;
 
             if ((p1card.Type == CardTypes.Monster) && (p2card.Type == CardTypes.Monster))
             {

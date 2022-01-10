@@ -27,7 +27,7 @@ Weiteres beinhaltet meine Projektstruktur folgende Ordner:
 Beim Erstellen der Datenbank habe ich mein Wissen aus der LV "Datenmanagement" angewendet und mir zu Beginn zu besseren Visualisierung ein ERM für den konkreten Sachverhalt erstellt. Dies half mit dabei eine sinnvolle Tabellenstruktur zu entwickeln.  
 Nachfolgende Abbildungen zeigen mein ERM, sowie die schlussendlich tatsächlich erstellten Tabellen.
 
-![ERM Entwurf](./doku_img/erm.PNG)
+![ERM Entwurf](./doku_img/erm.jpg)
 ![Tatsächliche DB](./doku_img/db.PNG)
 
 

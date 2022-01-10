@@ -26,21 +26,21 @@ Weiteres beinhaltet meine Projektstruktur folgende Ordner:
 
 ### Datenbank
 
-Beim Erstellen der Datenbank habe ich mein Wissen aus der LV "Datenmanagement" angewendet und mir zu Beginn zu besseren Visualisierung ein ERM für den konkreten Sachverhalt erstellt. Dies half mit dabei eine sinnvolle Tabellenstruktur zu entwickeln.  
+Beim Erstellen der Datenbank habe ich mein Wissen aus der LV "Datenmanagement" angewendet und mir zu Beginn zur besseren Visualisierung ein ERM für den konkreten Sachverhalt erstellt. Dies half mir dabei eine sinnvolle Tabellenstruktur zu entwickeln.  
 Nachfolgende Abbildungen zeigen mein ERM, sowie die schlussendlich tatsächlich erstellten Tabellen.
 
 ![ERM Entwurf](./doku_img/erm.jpg)
 ![Tatsächliche DB](./doku_img/db.PNG)
 
-Zugriff auf die Datenbank erfolgt via Repositories. Zu jedem Repository gibt es ein zugehäriges Interface.
+Zugriff auf die Datenbank erfolgt via Repositories. Zu jedem Repository gibt es ein zugehöriges Interface.
 
-Durch Prepared Statements verhindere ich SQL Injections. Zudem arbeite ich teilweise mit Transactions um zu garatnieren, dass gewisse Operationen, wie etwa das Kaufen eine Packages als Ganzes ausgeführt werden oder garnicht (e.g. User soll keine Coins verlieren ohne die jeweiligen Packages zu bekommen)
+Durch Prepared Statements verhindere ich SQL Injections. Zudem arbeite ich teilweise mit Transactions um zu garantieren, dass gewisse Operationen, wie etwa das Kaufen eine Packages als Ganzes ausgeführt werden oder garnicht (e.g. User soll keine Coins verlieren ohne die jeweiligen Packages zu bekommen)
 
 Weiteres habe ich darauf geachtet, dass zu jedem Zeitpunkt nur eine einzige Verbindung zur Datenbank existiert. Verwaltung der Connection übernimmt die PostgresAccess-Klasse. PostgresAccess implementiert das Singelton-Pattern mit Lazy initialization.  
 
 ### HttpServer & Routing
 
-Für den Http-Server habe ich das Beispiel aus der Vorlesung abgeändert. Die grundlegende Logik zum Anhandeln der Clients wurde beibehalten. Den Http-Parser habe ich erweitert, sodass auch der Content von Post-Requests geparset wird. Zudem habe ich Klassen für Http-Request und Http-Reponse erstellt, um diese effektiver zu Handhaben.
+Für den Http-Server habe ich das Beispiel aus der Vorlesung abgeändert. Die grundlegende Logik zum Anhandeln der Clients wurde beibehalten. Den Http-Parser habe ich erweitert, sodass auch der Content von Post-Requests geparsed5 wird. Zudem habe ich Klassen für Http-Request und Http-Reponse erstellt, um diese effektiver zu Handhaben.
 
 Für das Routing habe ich eine Router Klasse erstellt. Diese enthält Dictionaries mit einem String (Route) als Key und einem delegate als Value (Methode der Controller-Klassen), für jede Http-Anfragemethode e.g. PostRoutes, GetRoutes. Dadurch kann ich auf die gleiche Route mehrere Endpoints legen.
 
@@ -101,8 +101,8 @@ Als Special Feature habe ich das Erstellen und Verwalten von Karten-Decks insofe
 - Json zum Erstellen der Karten abgeändert
 - /login statt /sessions
 - /register statt /users
-- neue Routen zum starten bzw. joinen eines Battles
-- neue Routen zum Erstellen, Wechseln eines Decks
+- neue Routen zum Starten bzw. Joinen eines Battles
+- neue Routen zum Erstellen, sowie Wechseln eines Decks
 
 ## Unit Testing Decisions
 
@@ -110,11 +110,11 @@ Unit-Testing mit NUnit.
 
 Fokus meiner Unittests liegt beim Testen der Game-Logik, da diese aufgrund verzweigter if-else-Statements sehr fehleranfällig ist und auch nur schwer manuell überprüft werden kann.
 
-Zudem habe ich Teile meiner UserService und CardService Klasse getestet, da diese integraler Bestandteil des Programms sind. Dabei habe ich ein ein Custom Fake für das jeweils verwendete Repository manuell erstellt. Dieses habe ich mittels constructor injection injected.
+Zudem habe ich Teile meiner UserService und CardService Klasse getestet, da diese integraler Bestandteil des Programms sind. Dabei habe ich ein Custom Fake für das jeweils verwendete Repository manuell erstellt. Dieses habe ich mittels constructor injection injected.
 
 ## Lessons learned
 
-- Unit Tests nebenbei machen (Stichwort TDD) und nicht erst am Ende des Projekts: Unit-Tests am Ende machen ist sehr zeitaufwenig, insebesondere wenn sich der Code nicht gut testen lässt (aufgrund e.g vieler Dependencies, private Methoden, ...). Da dieses Projekt mein erstes Projekt mit C# ist, habe ich mich mehr auf die Umsetzung fokusiert, und die Tests zum Schluss aufgehoben.
+- Unit Tests nebenbei machen (Stichwort TDD) und nicht erst am Ende des Projekts: Unit-Tests am Ende machen ist sehr zeitaufwendig, insebesondere wenn sich der Code nicht gut testen lässt (aufgrund e.g vieler Dependencies, private Methoden, ...). Da dieses Projekt mein erstes Projekt mit C# ist, habe ich mich mehr auf die Umsetzung fokusiert, und die Tests zum Schluss aufgehoben.
 - Arbeiten mit Git verbesserungswürdig: Da ich bisher noch nie wirklich produktiv mit Git gearbeitet habe, war der Workflow sehr ungewohnt für mich. Ich habe öfter auf das Commiten Vergessen.  
 - Durchs selbst Programmieren lernt man am besten: Deutliche Verbesserung meiner C# Kenntnisse da ich zum ersten Mal in diesem Semester die Zeit gefunden habe mich wiklich aktiv mit C# zu beschäftigen.
 
@@ -124,4 +124,4 @@ Keine Aufzeichnung
 
 ## Link zu GitRepos
 
-[link](https://github.com/xxaemy/MCTG)
+[Git Repository](https://github.com/xxaemy/MCTG)
